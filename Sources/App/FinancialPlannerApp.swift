@@ -19,7 +19,7 @@ struct FinancialPlannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
+            AppEntryView()
         }
         .modelContainer(container)
     }

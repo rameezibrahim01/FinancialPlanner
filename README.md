@@ -6,11 +6,13 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 
 ## Status
 
-**Lane 2 — Plan the year**, **Lane 3 — Track**, and **Lane 4 — Review** are
+All four lanes — **Set up**, **Plan the year**, **Track**, and **Review** — are
 implemented end-to-end:
 
 | Screen | View | Notes |
 |---|---|---|
+| A1 · Welcome | `WelcomeView` | first-launch hero, "Get started" / "I already have a backup" |
+| A2 · Income setup | `IncomeSetupView` | income source cards, add-source sheet, projected annual income |
 | B1 · Year Plan | `YearPlanView` | 12-month table, green summary card, "Copy to all months" |
 | B2 · Month Plan editor ★ | `MonthPlanEditorView` | live planned-savings + allocation meter, draggable category sliders, over-allocation warning |
 | B3 · Plan vs Actual | `PlanVsActualView` | per-category actual/plan bars from transactions, ON TRACK/OVER status |
@@ -21,18 +23,19 @@ implemented end-to-end:
 | D1 · Charts & trends | `ChartsView` | avg/best/worst stat cards, net-by-month bar chart, top-categories breakdown |
 | D2 · Year in review & settings | `SettingsView` | 2×2 stat grid, data/settings list, JSON backup export via share sheet |
 
-The app launches into the **Dashboard** (Year tab). The bottom tab bar hosts
-Year (Dashboard), Plan (Year Plan → B2 → B3), a center **+** that presents Add
-Transaction (C3), Charts (D1), and Settings (D2). Tapping a month on the
-Dashboard opens its breakdown (C2). B4 is reached from the "Goals" toolbar button
-inside the Plan tab.
+On first launch the app shows the **setup flow** (A1 → A2); finishing (or
+skipping via "I already have a backup") sets a persisted `hasCompletedOnboarding`
+flag and never shows it again. After that the app opens on the **Dashboard**
+(Year tab). The bottom tab bar hosts Year (Dashboard), Plan (Year Plan → B2 →
+B3), a center **+** that presents Add Transaction (C3), Charts (D1), and Settings
+(D2). Tapping a month on the Dashboard opens its breakdown (C2). B4 is reached
+from the "Goals" toolbar button inside the Plan tab.
 
-Only **Lane 1 (Set up)** — A1 Welcome / A2 Income setup — remains unbuilt. The
-store seeds a full year of actual transactions (salary income + per-category
-expenses; October is intentionally over budget) so the Track and Review screens
-have data to display, while keeping June's exact plan-vs-actual figures. The
-"Export backup file" action serializes all plans, transactions, and goals to a
-JSON file and presents the system share sheet (fully offline).
+The store seeds a full year of actual transactions (salary income +
+per-category expenses; October is intentionally over budget) so the Track and
+Review screens have data to display, while keeping June's exact plan-vs-actual
+figures. The "Export backup file" action serializes all plans, transactions, and
+goals to a JSON file and presents the system share sheet (fully offline).
 
 ## Project layout
 
