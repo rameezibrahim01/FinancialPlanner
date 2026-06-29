@@ -17,8 +17,8 @@ struct RootTabView: View {
             switch tab {
             case .year:     NavigationStack { DashboardView() }
             case .plan:     NavigationStack { YearPlanView() }
-            case .charts:   NavigationStack { ComingSoonView(title: "Charts & trends", systemImage: "chart.bar") }
-            case .settings: NavigationStack { ComingSoonView(title: "Year in review", systemImage: "gearshape") }
+            case .charts:   NavigationStack { ChartsView() }
+            case .settings: NavigationStack { SettingsView() }
             }
         }
         .tint(Theme.Palette.green)
@@ -30,6 +30,7 @@ struct RootTabView: View {
         }
     }
 }
+
 
 // MARK: - Custom tab bar
 
@@ -84,28 +85,5 @@ private struct AppTabBar: View {
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
         .offset(y: -22)
-    }
-}
-
-// MARK: - Placeholder for not-yet-built lanes (Charts / Settings)
-
-struct ComingSoonView: View {
-    let title: String
-    let systemImage: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 34, weight: .regular))
-                .foregroundStyle(Theme.Palette.faint)
-            Text(title)
-                .font(.ui(20, .heavy)).foregroundStyle(Theme.Palette.ink)
-            Text("Coming soon")
-                .font(.mono(11, .medium)).kerning(0.5)
-                .foregroundStyle(Theme.Palette.muted)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .screenBackground()
-        .toolbar(.hidden, for: .navigationBar)
     }
 }

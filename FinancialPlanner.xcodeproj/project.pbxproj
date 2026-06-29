@@ -20,6 +20,8 @@
 		B1B1B1B1B1B1B1B1B1B1B102 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A102 /* DashboardView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B103 /* MonthlyBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A103 /* MonthlyBreakdownView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B104 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A104 /* AddTransactionView.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B105 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B106 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		A1A1A1A1A1A1A1A1A1A1A102 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A103 /* MonthlyBreakdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyBreakdownView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A104 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -80,8 +84,18 @@
 			children = (
 				7DE5214EF2C8D9427F72EFB8 /* PlanYear */,
 				C1C1C1C1C1C1C1C1C1C1C101 /* Track */,
+				C1C1C1C1C1C1C1C1C1C1C102 /* Review */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		C1C1C1C1C1C1C1C1C1C1C102 /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */,
+				A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */,
+			);
+			path = Review;
 			sourceTree = "<group>";
 		};
 		C1C1C1C1C1C1C1C1C1C1C101 /* Track */ = {
@@ -197,6 +211,8 @@
 				B1B1B1B1B1B1B1B1B1B1B102 /* DashboardView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B103 /* MonthlyBreakdownView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B104 /* AddTransactionView.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B105 /* ChartsView.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B106 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

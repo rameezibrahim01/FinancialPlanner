@@ -6,7 +6,8 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 
 ## Status
 
-**Lane 2 — Plan the year** and **Lane 3 — Track** are implemented end-to-end:
+**Lane 2 — Plan the year**, **Lane 3 — Track**, and **Lane 4 — Review** are
+implemented end-to-end:
 
 | Screen | View | Notes |
 |---|---|---|
@@ -17,18 +18,21 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 | C1 · Dashboard (home) | `DashboardView` | net-saved card, 12-month at-a-glance grid, custom bottom tab bar |
 | C2 · Monthly breakdown | `MonthlyBreakdownView` | net + income/spent split bar, "where it went" category bars, recent transactions |
 | C3 · Add transaction | `AddTransactionView` | Expense/Income segmented control, amount display, category chips, numeric keypad |
+| D1 · Charts & trends | `ChartsView` | avg/best/worst stat cards, net-by-month bar chart, top-categories breakdown |
+| D2 · Year in review & settings | `SettingsView` | 2×2 stat grid, data/settings list, JSON backup export via share sheet |
 
-The app now launches into the **Dashboard** (Year tab). The bottom tab bar hosts
+The app launches into the **Dashboard** (Year tab). The bottom tab bar hosts
 Year (Dashboard), Plan (Year Plan → B2 → B3), a center **+** that presents Add
-Transaction (C3), and Charts / Settings placeholders. Tapping a month on the
+Transaction (C3), Charts (D1), and Settings (D2). Tapping a month on the
 Dashboard opens its breakdown (C2). B4 is reached from the "Goals" toolbar button
 inside the Plan tab.
 
-Lane 1 (Set up) and Lane 4 (Review — Charts & Settings) are not built yet; the
-Charts and Settings tabs show a "coming soon" placeholder. The store now seeds a
-full year of actual transactions (salary income + per-category expenses; October
-is intentionally over budget) so the Track screens have data to display, while
-keeping June's exact plan-vs-actual figures.
+Only **Lane 1 (Set up)** — A1 Welcome / A2 Income setup — remains unbuilt. The
+store seeds a full year of actual transactions (salary income + per-category
+expenses; October is intentionally over budget) so the Track and Review screens
+have data to display, while keeping June's exact plan-vs-actual figures. The
+"Export backup file" action serializes all plans, transactions, and goals to a
+JSON file and presents the system share sheet (fully offline).
 
 ## Project layout
 
