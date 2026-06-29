@@ -86,7 +86,9 @@ Per-screen, two adaptive helpers (in `DesignSystem/Components.swift`) keep the
 iPad layout from stretching: `readableContent(_:)` caps and centers content
 width, and `navBarHiddenInCompact()` hides the bar on iPhone while keeping the
 sidebar toggle on iPad. The Dashboard's month grid widens from 3 to 6 columns in
-regular width.
+regular width, and the B2 month-plan editor splits into two columns on iPad
+(planned-income/savings summary on the left, category-budget sliders on the
+right) while staying a single stacked column on iPhone.
 
 ## Notes / deviations
 
