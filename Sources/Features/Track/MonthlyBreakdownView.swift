@@ -47,6 +47,7 @@ struct MonthlyBreakdownView: View {
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent()
         }
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)

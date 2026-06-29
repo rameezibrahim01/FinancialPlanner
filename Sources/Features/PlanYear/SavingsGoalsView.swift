@@ -19,6 +19,7 @@ struct SavingsGoalsView: View {
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent()
         }
         .screenBackground()
         .navigationTitle("Savings goals")

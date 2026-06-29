@@ -48,6 +48,8 @@ struct AddTransactionView: View {
             }
             keypad
         }
+        .frame(maxWidth: 520)
+        .frame(maxWidth: .infinity)
         .background(Theme.Palette.page.ignoresSafeArea())
         .onAppear(perform: syncSelection)
         .onChange(of: type) { _, _ in syncSelection() }

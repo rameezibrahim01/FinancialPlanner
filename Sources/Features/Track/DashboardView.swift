@@ -5,6 +5,7 @@ import SwiftData
 /// 12-month grid of net/spend-ratio cells, each tapping into the monthly
 /// breakdown (C2). All figures are derived from transactions + plans.
 struct DashboardView: View {
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
 
@@ -42,7 +43,10 @@ struct DashboardView: View {
     private var savingsRate: Int { totalIncome > 0 ? Int((netSaved / totalIncome * 100).rounded()) : 0 }
     private var onPlan: Bool { netSaved >= 0 }
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+    private var columns: [GridItem] {
+        let count = sizeClass == .regular ? 6 : 3
+        return Array(repeating: GridItem(.flexible(), spacing: 10), count: count)
+    }
 
     var body: some View {
         ScrollView {
@@ -54,9 +58,10 @@ struct DashboardView: View {
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent(820)
         }
         .screenBackground()
-        .toolbar(.hidden, for: .navigationBar)
+        .navBarHiddenInCompact()
     }
 
     // MARK: Header

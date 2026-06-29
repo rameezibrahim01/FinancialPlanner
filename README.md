@@ -71,6 +71,23 @@ xcodebuild -project FinancialPlanner.xcodeproj -scheme FinancialPlanner \
 > Regenerate the project with `xcodegen generate` whenever you add or remove
 > source files. Min deployment target: iOS 17 (required by SwiftData).
 
+## Platforms
+
+Universal (iPhone + iPad), portrait on iPhone and all orientations on iPad.
+The navigation shell adapts to the horizontal size class:
+
+- **iPhone (compact):** the custom bottom tab bar (Year / Plan / + / Charts /
+  Settings) with the raised center Add button.
+- **iPad (regular):** a `NavigationSplitView` **sidebar** for the four sections
+  with an "New transaction" action button; section content fills the detail
+  pane. iPad Split View / Slide Over fall back to the compact tab bar.
+
+Per-screen, two adaptive helpers (in `DesignSystem/Components.swift`) keep the
+iPad layout from stretching: `readableContent(_:)` caps and centers content
+width, and `navBarHiddenInCompact()` hides the bar on iPhone while keeping the
+sidebar toggle on iPad. The Dashboard's month grid widens from 3 to 6 columns in
+regular width.
+
 ## Notes / deviations
 
 - **Fonts:** the handoff calls for Hanken Grotesk + IBM Plex Mono. SF Pro (system)

@@ -27,6 +27,7 @@ struct YearPlanView: View {
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent()
         }
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)

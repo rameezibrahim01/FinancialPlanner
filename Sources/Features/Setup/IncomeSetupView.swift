@@ -28,6 +28,7 @@ struct IncomeSetupView: View {
                 .padding(.horizontal, Theme.Spacing.side)
                 .padding(.top, 8)
                 .padding(.bottom, Theme.Spacing.bottomSafe)
+                .readableContent(640)
             }
             footer
         }
@@ -80,6 +81,7 @@ struct IncomeSetupView: View {
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent(640)
             .background(Theme.Palette.page)
     }
 }

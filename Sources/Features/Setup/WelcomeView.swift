@@ -27,6 +27,7 @@ struct WelcomeView: View {
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 30)
+        .frame(maxWidth: 480)
         .frame(maxWidth: .infinity)
         .screenBackground()
         .toolbar(.hidden, for: .navigationBar)

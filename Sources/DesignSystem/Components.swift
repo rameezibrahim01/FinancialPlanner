@@ -197,3 +197,38 @@ struct ScreenBackground: ViewModifier {
 extension View {
     func screenBackground() -> some View { modifier(ScreenBackground()) }
 }
+
+// MARK: - Size-class adaptive helpers (iPad support)
+
+/// Hides the navigation bar only in compact width (iPhone). In regular width
+/// (iPad split view) the bar stays so the sidebar toggle remains reachable.
+private struct CompactHiddenNavBar: ViewModifier {
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    func body(content: Content) -> some View {
+        content
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(sizeClass == .compact ? .hidden : .automatic, for: .navigationBar)
+    }
+}
+
+extension View {
+    func navBarHiddenInCompact() -> some View { modifier(CompactHiddenNavBar()) }
+}
+
+/// Caps content to a readable width and centers it. On iPhone the cap exceeds
+/// the screen so it has no effect; on iPad it keeps the detail pane from
+/// stretching edge-to-edge.
+private struct ReadableContent: ViewModifier {
+    var maxWidth: CGFloat
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: maxWidth)
+            .frame(maxWidth: .infinity)
+    }
+}
+
+extension View {
+    func readableContent(_ maxWidth: CGFloat = 760) -> some View {
+        modifier(ReadableContent(maxWidth: maxWidth))
+    }
+}

@@ -58,9 +58,10 @@ struct SettingsView: View {
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent()
         }
         .screenBackground()
-        .toolbar(.hidden, for: .navigationBar)
+        .navBarHiddenInCompact()
         .task { backupURL = try? Backup.write(plans: plans, txns: txns, goals: goals, year: year) }
     }
 

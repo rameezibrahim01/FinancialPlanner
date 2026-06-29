@@ -56,9 +56,10 @@ struct ChartsView: View {
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
+            .readableContent()
         }
         .screenBackground()
-        .toolbar(.hidden, for: .navigationBar)
+        .navBarHiddenInCompact()
     }
 
     // MARK: Header
