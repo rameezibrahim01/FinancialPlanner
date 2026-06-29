@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+</style>
+</helmet>
+
+<!-- ===== CANVAS TITLE ===== -->
+<div style="position:absolute;left:60px;top:34px;width:1100px">
+  <div style="font-family:'Hanken Grotesk',system-ui;font-size:32px;font-weight:800;color:#15201a;letter-spacing:-0.7px">Yearly Finance Planner — full app flow</div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a928c;margin-top:8px;letter-spacing:0.3px">OFFLINE iOS APP · AED · 2026 · SET UP → PLAN → TRACK → REVIEW</div>
+</div>
+
+<!-- ===== FLOW CONNECTORS (horizontal arrows) ===== -->
+<div style="position:absolute;left:478px;top:685px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:536px;top:681px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+
+<div style="position:absolute;left:478px;top:1745px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:536px;top:1741px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+<div style="position:absolute;left:976px;top:1745px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:1034px;top:1741px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+<div style="position:absolute;left:1474px;top:1745px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:1532px;top:1741px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+
+<div style="position:absolute;left:478px;top:2805px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:536px;top:2801px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+<div style="position:absolute;left:976px;top:2805px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:1034px;top:2801px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+
+<div style="position:absolute;left:478px;top:3865px;width:62px;height:2px;background:#cfcfc4"></div>
+<div style="position:absolute;left:536px;top:3861px;width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #cfcfc4"></div>
+
+<!-- ===== FLOW CONNECTORS (vertical, lane to lane) ===== -->
+<div style="position:absolute;left:30px;top:1140px;width:2px;height:54px;background:#cfcfc4"></div>
+<div style="position:absolute;left:26px;top:1192px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid #cfcfc4"></div>
+<div style="position:absolute;left:30px;top:2200px;width:2px;height:54px;background:#cfcfc4"></div>
+<div style="position:absolute;left:26px;top:2252px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid #cfcfc4"></div>
+<div style="position:absolute;left:30px;top:3260px;width:2px;height:54px;background:#cfcfc4"></div>
+<div style="position:absolute;left:26px;top:3312px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid #cfcfc4"></div>
+
+<!-- ===== LANE HEADERS ===== -->
+<div style="position:absolute;left:60px;top:150px;width:1600px;display:flex;align-items:center;gap:14px;font-family:'Hanken Grotesk',system-ui">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1f6f54;font-weight:600;border:1px solid #cfe0d6;background:#eaf2ed;padding:5px 11px;border-radius:99px;letter-spacing:0.5px">STEP 1</span>
+  <span style="font-size:22px;font-weight:800;color:#15201a;letter-spacing:-0.4px">Set up</span>
+  <span style="font-size:14px;color:#8a928c">Tell the app your income — once, then you're offline for good</span>
+</div>
+<div style="position:absolute;left:60px;top:1210px;width:1900px;display:flex;align-items:center;gap:14px;font-family:'Hanken Grotesk',system-ui">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1f6f54;font-weight:600;border:1px solid #cfe0d6;background:#eaf2ed;padding:5px 11px;border-radius:99px;letter-spacing:0.5px">STEP 2</span>
+  <span style="font-size:22px;font-weight:800;color:#15201a;letter-spacing:-0.4px">Plan the year</span>
+  <span style="font-size:14px;color:#8a928c">Budget every month, allocate to categories, set a savings goal</span>
+</div>
+<div style="position:absolute;left:60px;top:2270px;width:1600px;display:flex;align-items:center;gap:14px;font-family:'Hanken Grotesk',system-ui">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1f6f54;font-weight:600;border:1px solid #cfe0d6;background:#eaf2ed;padding:5px 11px;border-radius:99px;letter-spacing:0.5px">STEP 3</span>
+  <span style="font-size:22px;font-weight:800;color:#15201a;letter-spacing:-0.4px">Track</span>
+  <span style="font-size:14px;color:#8a928c">Log income &amp; expenses against the plan as the year unfolds</span>
+</div>
+<div style="position:absolute;left:60px;top:3330px;width:1600px;display:flex;align-items:center;gap:14px;font-family:'Hanken Grotesk',system-ui">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1f6f54;font-weight:600;border:1px solid #cfe0d6;background:#eaf2ed;padding:5px 11px;border-radius:99px;letter-spacing:0.5px">STEP 4</span>
+  <span style="font-size:22px;font-weight:800;color:#15201a;letter-spacing:-0.4px">Review</span>
+  <span style="font-size:14px;color:#8a928c">See trends and close out the year</span>
+</div>
+
+<!-- =================================================== -->
+<!-- LANE 1 · SET UP                                      -->
+<!-- =================================================== -->
+
+<!-- A1 · WELCOME -->
+<div style="position:absolute;left:60px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">A1 · WELCOME</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 34px;text-align:center">
+        <div style="width:72px;height:72px;border-radius:22px;background:#1f6f54;display:flex;align-items:flex-end;justify-content:center;gap:5px;padding:16px;box-shadow:0 10px 26px rgba(31,111,84,0.32)">
+          <span style="width:8px;height:20px;border-radius:3px;background:#9bd2b8"></span>
+          <span style="width:8px;height:34px;border-radius:3px;background:#c8e6d8"></span>
+          <span style="width:8px;height:28px;border-radius:3px;background:#fff"></span>
+        </div>
+        <div style="font-size:30px;font-weight:800;letter-spacing:-0.8px;margin-top:30px;line-height:1.12">Plan your whole<br>year. Offline.</div>
+        <div style="font-size:15px;color:#5f6862;margin-top:14px;line-height:1.5;max-width:280px">Budget every month, track income &amp; expenses, and hit your savings goals — all stored on your device.</div>
+      </div>
+      <div style="padding:0 24px 30px;flex-shrink:0">
+        <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#1f6f54;letter-spacing:0.4px">
+          <span style="width:6px;height:6px;border-radius:99px;background:#1f6f54"></span>WORKS 100% OFFLINE · NO ACCOUNT
+        </div>
+        <div style="background:#1f6f54;color:#fff;text-align:center;padding:16px;border-radius:16px;font-size:16px;font-weight:700;box-shadow:0 8px 20px rgba(31,111,84,0.28)">Get started</div>
+        <div style="text-align:center;padding:16px;font-size:15px;font-weight:600;color:#5f6862">I already have a backup</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- A2 · INCOME SETUP -->
+<div style="position:absolute;left:558px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">A2 · INCOME SETUP</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">SETUP · 1 OF 2</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:4px">Your income</div>
+        <div style="font-size:14px;color:#5f6862;margin-top:6px;line-height:1.45">Add what comes in each month. We'll use it as the baseline for every plan.</div>
+      </div>
+
+      <div style="margin:16px 16px 0;flex-shrink:0">
+        <sc-for list="{{ incomeSources }}" as="s" hint-placeholder-count="2">
+          <div style="background:#fff;border-radius:18px;padding:15px 16px;margin-bottom:10px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:38px;height:38px;border-radius:11px;background:{{ s.tint }};flex-shrink:0"></span>
+              <div style="flex:1">
+                <div style="font-size:15px;font-weight:700">{{ s.name }}</div>
+                <div style="font-size:12px;color:#8a928c;margin-top:1px">{{ s.cadence }}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.amount }}</div>
+                <div style="font-size:11px;color:#1f6f54;font-weight:600;margin-top:1px">recurring</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="border:1.5px dashed #c9c9bf;border-radius:18px;padding:15px;text-align:center;font-size:14px;font-weight:600;color:#5f6862">+ Add income source</div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <div style="margin:0 16px;background:#eaf2ed;border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:13px;color:#1f6f54;font-weight:600">Projected annual income</div>
+        <div style="font-size:20px;font-weight:800;color:#1f6f54;font-variant-numeric:tabular-nums">AED 236,400</div>
+      </div>
+      <div style="padding:16px 16px 30px;flex-shrink:0">
+        <div style="background:#1f6f54;color:#fff;text-align:center;padding:16px;border-radius:16px;font-size:16px;font-weight:700;box-shadow:0 8px 20px rgba(31,111,84,0.28)">Continue to planning</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- LANE 2 · PLAN THE YEAR                               -->
+<!-- =================================================== -->
+
+<!-- B1 · YEAR PLAN GRID -->
+<div style="position:absolute;left:60px;top:1308px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">B1 · YEAR PLAN</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">PLAN · 2026</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Year plan</div>
+      </div>
+
+      <div style="margin:10px 16px 0;background:#1f6f54;border-radius:22px;padding:18px 20px;flex-shrink:0;box-shadow:0 8px 22px rgba(31,111,84,0.22)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:13px;color:#bfe0cf">Planned to save in 2026</div>
+          <div style="font-size:12px;font-weight:700;color:#0f3527;background:#9bd2b8;padding:4px 9px;border-radius:99px">115% of goal</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:7px">
+          <span style="font-size:15px;font-weight:600;color:#bfe0cf">AED</span>
+          <span style="font-size:36px;font-weight:800;letter-spacing:-1px;color:#fff;font-variant-numeric:tabular-nums">68,700</span>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:14px">
+          <div><div style="font-size:11px;color:#9ec9b3">Income</div><div style="font-size:15px;font-weight:700;color:#eaf6f0;font-variant-numeric:tabular-nums">230,000</div></div>
+          <div><div style="font-size:11px;color:#9ec9b3">Budget</div><div style="font-size:15px;font-weight:700;color:#eaf6f0;font-variant-numeric:tabular-nums">161,300</div></div>
+          <div><div style="font-size:11px;color:#9ec9b3">Goal</div><div style="font-size:15px;font-weight:700;color:#eaf6f0;font-variant-numeric:tabular-nums">60,000</div></div>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">Monthly plan</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#a0a89f;letter-spacing:0.4px">AED · THOUSANDS</div>
+      </div>
+
+      <div style="margin:0 16px;display:flex;padding:0 14px 7px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#a0a89f;letter-spacing:0.4px;flex-shrink:0">
+        <div style="width:42px">MON</div><div style="flex:1;text-align:right">INCOME</div><div style="flex:1;text-align:right">BUDGET</div><div style="flex:1;text-align:right">SAVE</div><div style="width:16px"></div>
+      </div>
+
+      <div style="flex:1;overflow:hidden;margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <sc-for list="{{ yearPlan }}" as="p" hint-placeholder-count="12">
+          <div style="display:flex;align-items:center;padding:0 14px;height:43px;border-bottom:1px solid #f3f3ee;font-size:13px;font-variant-numeric:tabular-nums">
+            <div style="width:42px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5f6862;letter-spacing:0.3px">{{ p.abbr }}</div>
+            <div style="flex:1;text-align:right;color:#4a544e">{{ p.inc }}</div>
+            <div style="flex:1;text-align:right;color:#4a544e">{{ p.bud }}</div>
+            <div style="flex:1;text-align:right;font-weight:700;color:#1f6f54">{{ p.save }}</div>
+            <div style="width:16px;text-align:right;color:#cdd2cb">›</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:12px 16px 28px;flex-shrink:0">
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;background:#fff;border:1px solid #e2e2d8;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:600;color:#1f6f54">Copy to all months</div>
+          <div style="flex:1;background:#1f6f54;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:14px;font-weight:700">Edit a month</div>
+        </div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- B2 · MONTH PLAN EDITOR -->
+<div style="position:absolute;left:558px;top:1308px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">B2 · MONTH PLAN EDITOR ★</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="width:34px;height:34px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;color:#4a544e;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.05)">‹</div>
+        <div style="font-size:17px;font-weight:700">March 2026 plan</div>
+        <div style="font-size:15px;color:#1f6f54;font-weight:700">Save</div>
+      </div>
+
+      <div style="margin:8px 16px 0;background:#fff;border-radius:20px;padding:16px 18px;flex-shrink:0;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:14px;color:#5f6862">Planned income</div>
+          <div style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums">AED 18,500</div>
+        </div>
+        <div style="height:1px;background:#ecece6;margin:13px 0"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div style="font-size:14px;color:#5f6862">Planned savings</div>
+          <div style="font-size:20px;font-weight:800;color:#1f6f54;font-variant-numeric:tabular-nums">AED 5,300 <span style="font-size:13px;color:#8a928c;font-weight:600">· 29%</span></div>
+        </div>
+        <div style="margin-top:13px">
+          <div style="display:flex;height:9px;border-radius:99px;overflow:hidden;background:#ecece6">
+            <div style="width:71.4%;background:#c19a4a"></div>
+            <div style="width:1px;background:#fff"></div>
+            <div style="width:28.6%;background:#1f6f54"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:#8a928c">
+            <span>AED 13,200 budgeted</span><span>AED 5,300 to savings</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">Category budgets</div>
+        <div style="font-size:12px;color:#1f6f54;font-weight:600">+ Add</div>
+      </div>
+
+      <div style="flex:1;overflow:hidden;padding:0 18px;display:flex;flex-direction:column;gap:15px">
+        <sc-for list="{{ planCats }}" as="c" hint-placeholder-count="7">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span style="width:9px;height:9px;border-radius:3px;background:{{ c.color }}"></span>
+              <div style="flex:1;font-size:13px;font-weight:600">{{ c.name }}</div>
+              <div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">{{ c.amount }}</div>
+            </div>
+            <div style="position:relative;height:6px;border-radius:99px;background:#ecece6">
+              <div style="position:absolute;left:0;top:0;height:100%;border-radius:99px;background:{{ c.color }};width:{{ c.fill }}%"></div>
+              <div style="position:absolute;top:50%;left:{{ c.fill }}%;width:16px;height:16px;border-radius:99px;background:#fff;border:2px solid {{ c.color }};transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,0.15)"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;height:30px"></div>
+    </div>
+  </x-import>
+</div>
+
+<!-- B3 · PLAN VS ACTUAL -->
+<div style="position:absolute;left:1056px;top:1308px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">B3 · PLAN vs ACTUAL</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="width:34px;height:34px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;color:#4a544e;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.05)">‹</div>
+        <div style="text-align:center"><div style="font-size:17px;font-weight:700">June · plan vs actual</div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#1f6f54;letter-spacing:0.4px;margin-top:1px">ON TRACK · 2 DAYS LEFT</div></div>
+        <div style="width:34px;height:34px"></div>
+      </div>
+
+      <div style="margin:8px 16px 0;background:#fff;border-radius:22px;padding:18px 20px;flex-shrink:0;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <div>
+            <div style="font-size:13px;color:#8a928c">Spent of budget</div>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-top:4px">
+              <span style="font-size:32px;font-weight:800;letter-spacing:-0.8px;font-variant-numeric:tabular-nums">9,840</span>
+              <span style="font-size:16px;color:#8a928c;font-weight:600">/ 12,000</span>
+            </div>
+          </div>
+          <div style="text-align:right"><div style="font-size:13px;color:#8a928c">Left</div><div style="font-size:18px;font-weight:800;color:#1f6f54;font-variant-numeric:tabular-nums">2,160</div></div>
+        </div>
+        <div style="height:10px;border-radius:99px;background:#ecece6;overflow:hidden;margin-top:14px">
+          <div style="height:100%;width:82%;border-radius:99px;background:#1f6f54"></div>
+        </div>
+        <div style="font-size:11px;color:#8a928c;margin-top:7px">82% of June budget used</div>
+      </div>
+
+      <div style="padding:16px 22px 8px;font-size:15px;font-weight:700;flex-shrink:0">By category</div>
+      <div style="flex:1;overflow:hidden;padding:0 18px;display:flex;flex-direction:column;gap:15px">
+        <sc-for list="{{ planActual }}" as="c" hint-placeholder-count="6">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+              <span style="width:9px;height:9px;border-radius:3px;background:{{ c.color }}"></span>
+              <div style="flex:1;font-size:13px;font-weight:600">{{ c.name }}</div>
+              <div style="font-size:13px;font-variant-numeric:tabular-nums"><span style="font-weight:700;color:{{ c.actColor }}">{{ c.actual }}</span><span style="color:#a0a89f"> / {{ c.plan }}</span></div>
+            </div>
+            <div style="height:6px;border-radius:99px;background:#ecece6;overflow:hidden">
+              <div style="height:100%;border-radius:99px;background:{{ c.barColor }};width:{{ c.fill }}%"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="flex-shrink:0;height:28px"></div>
+    </div>
+  </x-import>
+</div>
+
+<!-- B4 · SAVINGS GOAL -->
+<div style="position:absolute;left:1554px;top:1308px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">B4 · SAVINGS GOAL</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">PLAN · GOALS</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Savings goals</div>
+      </div>
+
+      <div style="margin:12px 16px 0;background:#fff;border-radius:22px;padding:22px 20px;flex-shrink:0;box-shadow:0 1px 2px rgba(20,40,30,0.04);display:flex;flex-direction:column;align-items:center;text-align:center">
+        <div style="width:140px;height:140px;border-radius:99px;background:conic-gradient(#1f6f54 0% 64%, #e7e7e0 64% 100%);display:flex;align-items:center;justify-content:center">
+          <div style="width:108px;height:108px;border-radius:99px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:28px;font-weight:800;color:#1f6f54">64%</div>
+            <div style="font-size:11px;color:#8a928c;margin-top:2px">funded</div>
+          </div>
+        </div>
+        <div style="font-size:18px;font-weight:800;margin-top:16px">New car</div>
+        <div style="font-size:14px;color:#5f6862;margin-top:3px;font-variant-numeric:tabular-nums">AED 38,400 of 60,000 · by Dec 2026</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:12px;background:#eaf2ed;padding:8px 14px;border-radius:99px;font-size:12px;font-weight:600;color:#1f6f54">
+          <span style="width:6px;height:6px;border-radius:99px;background:#1f6f54"></span>On track · AED 5,000/mo reaches it by Nov
+        </div>
+      </div>
+
+      <div style="padding:18px 22px 10px;font-size:15px;font-weight:700;flex-shrink:0">Other goals</div>
+      <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ goals }}" as="g" hint-placeholder-count="2">
+          <div style="background:#fff;border-radius:16px;padding:15px 16px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+              <div style="font-size:14px;font-weight:700">{{ g.name }}</div>
+              <div style="font-size:13px;color:#5f6862;font-variant-numeric:tabular-nums">{{ g.saved }} / {{ g.target }}</div>
+            </div>
+            <div style="height:7px;border-radius:99px;background:#ecece6;overflow:hidden">
+              <div style="height:100%;border-radius:99px;background:{{ g.color }};width:{{ g.fill }}%"></div>
+            </div>
+            <div style="font-size:11px;color:#8a928c;margin-top:7px">{{ g.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:12px 16px 28px;flex-shrink:0">
+        <div style="border:1.5px dashed #c9c9bf;border-radius:16px;padding:15px;text-align:center;font-size:14px;font-weight:600;color:#5f6862">+ New goal</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- LANE 3 · TRACK                                       -->
+<!-- =================================================== -->
+
+<!-- C1 · DASHBOARD -->
+<div style="position:absolute;left:60px;top:2368px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">C1 · DASHBOARD (HOME)</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 6px;display:flex;justify-content:space-between;align-items:flex-end;flex-shrink:0">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">ANNUAL · AED</div>
+          <div style="font-size:30px;font-weight:800;letter-spacing:-0.8px;line-height:1.05;margin-top:3px">2026</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;background:#dbeae1;color:#1f6f54;font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px">
+          <span style="width:6px;height:6px;border-radius:99px;background:#1f6f54;display:inline-block"></span>On plan
+        </div>
+      </div>
+
+      <div style="margin:8px 16px 0;background:#ffffff;border-radius:24px;padding:18px 20px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:13px;color:#8a928c;font-weight:500">Net saved this year</div>
+          <div style="font-size:12px;font-weight:700;color:#1f6f54;background:#eef6f1;padding:4px 9px;border-radius:99px">28% rate</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px">
+          <span style="font-size:16px;font-weight:600;color:#4a544e">AED</span>
+          <span style="font-size:38px;font-weight:800;letter-spacing:-1px;color:#1f6f54;font-variant-numeric:tabular-nums">63,700</span>
+        </div>
+        <div style="height:1px;background:#ecece6;margin:16px 0 14px"></div>
+        <div style="display:flex;gap:14px">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#8a928c"><span style="width:8px;height:8px;border-radius:99px;background:#1f6f54"></span>Income</div>
+            <div style="font-size:18px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums">230,000</div>
+          </div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#8a928c"><span style="width:8px;height:8px;border-radius:99px;background:#bd5a3c"></span>Expenses</div>
+            <div style="font-size:18px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums">166,300</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:18px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:16px;font-weight:700;letter-spacing:-0.2px">At a glance</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8a928c;letter-spacing:0.5px">NET / SPEND RATIO</div>
+      </div>
+
+      <div style="flex:1;overflow:hidden;padding:0 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-content:start">
+        <sc-for list="{{ months }}" as="m" hint-placeholder-count="12">
+          <div style="background:#ffffff;border-radius:15px;padding:11px 11px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#a0a89f;letter-spacing:0.5px">{{ m.abbr }}</div>
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.4px;font-variant-numeric:tabular-nums;color:{{ m.color }}">{{ m.netShort }}</div>
+            <div>
+              <div style="height:5px;border-radius:99px;background:#ecece6;overflow:hidden">
+                <div style="height:100%;border-radius:99px;background:{{ m.barColor }};width:{{ m.spendBar }}%"></div>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#a0a89f;margin-top:5px">{{ m.spendPct }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-around;padding:9px 16px 26px;background:rgba(241,241,236,0.92);border-top:1px solid #e6e6df">
+        <div style="font-size:11px;font-weight:700;color:#1f6f54">Year</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Plan</div>
+        <div style="width:46px;height:46px;border-radius:99px;background:#1f6f54;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:400;margin-top:-22px;box-shadow:0 6px 16px rgba(31,111,84,0.35)">+</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Charts</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Settings</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- C2 · MONTHLY BREAKDOWN -->
+<div style="position:absolute;left:558px;top:2368px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">C2 · MONTHLY BREAKDOWN</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="width:34px;height:34px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;color:#4a544e;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.05)">‹</div>
+        <div style="text-align:center">
+          <div style="font-size:17px;font-weight:700">October 2026</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#bd5a3c;letter-spacing:0.4px;margin-top:1px">OVER BUDGET</div>
+        </div>
+        <div style="width:34px;height:34px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;color:#4a544e;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.05)">›</div>
+      </div>
+
+      <div style="margin:8px 16px 0;background:#fff;border-radius:22px;padding:16px 18px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div style="font-size:13px;color:#8a928c">Net this month</div>
+          <div style="font-size:22px;font-weight:800;color:#bd5a3c;font-variant-numeric:tabular-nums">−400</div>
+        </div>
+        <div style="display:flex;height:10px;border-radius:99px;overflow:hidden;margin:14px 0 12px;background:#ecece6">
+          <div style="width:49.5%;background:#1f6f54"></div>
+          <div style="width:1px;background:#fff"></div>
+          <div style="width:50.5%;background:#bd5a3c"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:99px;background:#1f6f54"></span><span style="color:#8a928c">Income</span> <b style="font-variant-numeric:tabular-nums">18,500</b></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:99px;background:#bd5a3c"></span><span style="color:#8a928c">Spent</span> <b style="font-variant-numeric:tabular-nums">18,900</b></div>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 8px;font-size:15px;font-weight:700;flex-shrink:0">Where it went</div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:13px;flex-shrink:0">
+        <sc-for list="{{ octCats }}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="width:10px;height:10px;border-radius:3px;background:{{ c.color }};flex-shrink:0"></span>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="font-weight:500">{{ c.name }}</span><span style="font-variant-numeric:tabular-nums;color:#4a544e">{{ c.amount }}</span></div>
+              <div style="height:6px;border-radius:99px;background:#ecece6;overflow:hidden"><div style="height:100%;border-radius:99px;background:{{ c.color }};width:{{ c.bar }}%"></div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:16px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">Recent</div>
+        <div style="font-size:12px;color:#1f6f54;font-weight:600">See all</div>
+      </div>
+      <div style="flex:1;overflow:hidden;margin:0 16px;background:#fff;border-radius:20px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <sc-for list="{{ txns }}" as="t" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #f1f1ec">
+            <span style="width:34px;height:34px;border-radius:10px;background:{{ t.tint }};flex-shrink:0"></span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600">{{ t.name }}</div>
+              <div style="font-size:11px;color:#a0a89f;margin-top:1px">{{ t.sub }}</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ t.amtColor }}">{{ t.amt }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="flex-shrink:0;height:30px"></div>
+    </div>
+  </x-import>
+</div>
+
+<!-- C3 · ADD TRANSACTION -->
+<div style="position:absolute;left:1056px;top:2368px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">C3 · ADD TRANSACTION</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 20px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="font-size:15px;color:#8a928c;font-weight:500">Cancel</div>
+        <div style="font-size:15px;font-weight:700">New transaction</div>
+        <div style="font-size:15px;color:#1f6f54;font-weight:700">Save</div>
+      </div>
+
+      <div style="margin:10px 20px 0;background:#e7e7e0;border-radius:13px;padding:4px;display:flex;flex-shrink:0">
+        <div style="flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:14px;font-weight:700;background:#fff;color:#bd5a3c;box-shadow:0 1px 2px rgba(0,0,0,0.06)">Expense</div>
+        <div style="flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:14px;font-weight:600;color:#8a928c">Income</div>
+      </div>
+
+      <div style="text-align:center;padding:26px 0 22px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">AMOUNT</div>
+        <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:8px">
+          <span style="font-size:20px;font-weight:600;color:#8a928c">AED</span>
+          <span style="font-size:48px;font-weight:800;letter-spacing:-1.5px;color:#bd5a3c;font-variant-numeric:tabular-nums">86.00</span>
+          <span style="width:2px;height:40px;background:#bd5a3c;display:inline-block;border-radius:2px;opacity:0.5"></span>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 4px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;flex-shrink:0">
+        <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:14px;background:{{ c.bg }};border:1.5px solid {{ c.border }}">
+            <span style="width:18px;height:18px;border-radius:6px;background:{{ c.color }}"></span>
+            <span style="font-size:11px;font-weight:600;color:{{ c.textColor }}">{{ c.name }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin:14px 16px 0;background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(20,40,30,0.04);flex-shrink:0">
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f1f1ec;font-size:14px"><span style="color:#8a928c">Date</span><span style="font-weight:600">Today · Jun 29</span></div>
+        <div style="display:flex;justify-content:space-between;padding:13px 16px;font-size:14px"><span style="color:#8a928c">Note</span><span style="font-weight:600">Dinner · Zuma</span></div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <div style="padding:8px 12px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex-shrink:0">
+        <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+          <div style="display:flex;align-items:center;justify-content:center;height:50px;border-radius:14px;background:#fff;font-size:23px;font-weight:600;color:#15201a;box-shadow:0 1px 2px rgba(0,0,0,0.04)">{{ k }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- LANE 4 · REVIEW                                      -->
+<!-- =================================================== -->
+
+<!-- D1 · CHARTS & TRENDS -->
+<div style="position:absolute;left:60px;top:3428px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">D1 · CHARTS &amp; TRENDS</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 6px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">TRENDS · 2026</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Cash flow</div>
+      </div>
+
+      <div style="padding:6px 16px 0;display:flex;gap:9px;flex-shrink:0">
+        <div style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:10px;color:#8a928c">Avg / month</div>
+          <div style="font-size:16px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums">+5,308</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:10px;color:#8a928c">Best</div>
+          <div style="font-size:16px;font-weight:800;margin-top:2px;color:#1f6f54;font-variant-numeric:tabular-nums">Apr +9.4k</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:10px;color:#8a928c">Worst</div>
+          <div style="font-size:16px;font-weight:800;margin-top:2px;color:#bd5a3c;font-variant-numeric:tabular-nums">Oct −0.4k</div>
+        </div>
+      </div>
+
+      <div style="margin:14px 16px 0;background:#fff;border-radius:20px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(20,40,30,0.04);flex-shrink:0">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">Net by month</div>
+        <div style="display:flex;align-items:flex-end;gap:5px;height:118px">
+          <sc-for list="{{ chartMonths }}" as="c" hint-placeholder-count="12">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end">
+              <div style="width:100%;border-radius:5px 5px 2px 2px;background:{{ c.color }};height:{{ c.h }}px"></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#a0a89f">{{ c.abbr }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 10px;font-size:15px;font-weight:700;flex-shrink:0">Top categories</div>
+      <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="width:10px;height:10px;border-radius:3px;background:{{ c.color }};flex-shrink:0"></span>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="font-weight:500">{{ c.name }}</span><span style="color:#4a544e;font-variant-numeric:tabular-nums">{{ c.amount }} <span style="color:#a0a89f">· {{ c.pct }}</span></span></div>
+              <div style="height:6px;border-radius:99px;background:#ecece6;overflow:hidden"><div style="height:100%;border-radius:99px;background:{{ c.color }};width:{{ c.bar }}%"></div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-around;padding:9px 16px 26px;background:rgba(241,241,236,0.92);border-top:1px solid #e6e6df">
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Year</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Plan</div>
+        <div style="width:46px;height:46px;border-radius:99px;background:#1f6f54;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;margin-top:-22px;box-shadow:0 6px 16px rgba(31,111,84,0.35)">+</div>
+        <div style="font-size:11px;font-weight:700;color:#1f6f54">Charts</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Settings</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- D2 · YEAR SUMMARY & SETTINGS -->
+<div style="position:absolute;left:558px;top:3428px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">D2 · YEAR SUMMARY &amp; SETTINGS</div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">REVIEW · 2026</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Year in review</div>
+      </div>
+
+      <div style="padding:12px 16px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0">
+        <div style="background:#1f6f54;border-radius:18px;padding:15px 16px;color:#fff;box-shadow:0 6px 16px rgba(31,111,84,0.2)">
+          <div style="font-size:11px;color:#bfe0cf">Total saved</div>
+          <div style="font-size:24px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums">63,700</div>
+          <div style="font-size:11px;color:#bfe0cf;margin-top:2px">vs 60,000 planned</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+          <div style="font-size:11px;color:#8a928c">Savings rate</div>
+          <div style="font-size:24px;font-weight:800;margin-top:3px;color:#1f6f54;font-variant-numeric:tabular-nums">28%</div>
+          <div style="font-size:11px;color:#8a928c;margin-top:2px">of income kept</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+          <div style="font-size:11px;color:#8a928c">Biggest cost</div>
+          <div style="font-size:18px;font-weight:800;margin-top:5px">Housing</div>
+          <div style="font-size:11px;color:#8a928c;margin-top:2px">36% · 60,000</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+          <div style="font-size:11px;color:#8a928c">Months on budget</div>
+          <div style="font-size:18px;font-weight:800;margin-top:5px">11 of 12</div>
+          <div style="font-size:11px;color:#8a928c;margin-top:2px">only Oct over</div>
+        </div>
+      </div>
+
+      <div style="padding:18px 22px 8px;font-size:15px;font-weight:700;flex-shrink:0">Data &amp; settings</div>
+      <div style="flex:1;overflow:hidden;margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <sc-for list="{{ settings }}" as="s" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f3f3ee">
+            <span style="width:30px;height:30px;border-radius:8px;background:{{ s.tint }};flex-shrink:0"></span>
+            <div style="flex:1;font-size:14px;font-weight:600">{{ s.name }}</div>
+            <div style="font-size:13px;color:#8a928c">{{ s.value }}</div>
+            <div style="color:#cdd2cb;font-size:15px">›</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:12px 16px 28px;flex-shrink:0">
+        <div style="background:#1f6f54;color:#fff;text-align:center;padding:15px;border-radius:16px;font-size:15px;font-weight:700">Export backup file</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const GREEN = '#1f6f54', CLAY = '#bd5a3c';
+
+    const months = [
+      { abbr: 'JAN', netShort: '+6.1k', neg: false, spendBar: 67, spendPct: '67% spent' },
+      { abbr: 'FEB', netShort: '+8.7k', neg: false, spendBar: 53, spendPct: '53% spent' },
+      { abbr: 'MAR', netShort: '+3.3k', neg: false, spendBar: 82, spendPct: '82% spent' },
+      { abbr: 'APR', netShort: '+9.4k', neg: false, spendBar: 55, spendPct: '55% spent' },
+      { abbr: 'MAY', netShort: '+4.6k', neg: false, spendBar: 75, spendPct: '75% spent' },
+      { abbr: 'JUN', netShort: '+1.7k', neg: false, spendBar: 91, spendPct: '91% spent' },
+      { abbr: 'JUL', netShort: '+8.2k', neg: false, spendBar: 56, spendPct: '56% spent' },
+      { abbr: 'AUG', netShort: '+4.4k', neg: false, spendBar: 76, spendPct: '76% spent' },
+      { abbr: 'SEP', netShort: '+5.8k', neg: false, spendBar: 69, spendPct: '69% spent' },
+      { abbr: 'OCT', netShort: '−0.4k', neg: true, spendBar: 100, spendPct: '102% spent' },
+      { abbr: 'NOV', netShort: '+7.3k', neg: false, spendBar: 61, spendPct: '61% spent' },
+      { abbr: 'DEC', netShort: '+4.6k', neg: false, spendBar: 81, spendPct: '81% spent' },
+    ].map(m => ({
+      ...m,
+      color: m.neg ? CLAY : GREEN,
+      barColor: m.neg ? CLAY : (m.spendBar >= 85 ? '#d39a4a' : GREEN),
+    }));
+
+    const yearPlan = [
+      { abbr: 'JAN', inc: '18.5', bud: '13.0', save: '+5.5' },
+      { abbr: 'FEB', inc: '18.5', bud: '12.5', save: '+6.0' },
+      { abbr: 'MAR', inc: '18.5', bud: '13.2', save: '+5.3' },
+      { abbr: 'APR', inc: '21.0', bud: '13.0', save: '+8.0' },
+      { abbr: 'MAY', inc: '18.5', bud: '13.5', save: '+5.0' },
+      { abbr: 'JUN', inc: '18.5', bud: '12.0', save: '+6.5' },
+      { abbr: 'JUL', inc: '18.5', bud: '13.0', save: '+5.5' },
+      { abbr: 'AUG', inc: '18.5', bud: '13.8', save: '+4.7' },
+      { abbr: 'SEP', inc: '18.5', bud: '13.0', save: '+5.5' },
+      { abbr: 'OCT', inc: '18.5', bud: '14.5', save: '+4.0' },
+      { abbr: 'NOV', inc: '18.5', bud: '12.5', save: '+6.0' },
+      { abbr: 'DEC', inc: '24.0', bud: '16.3', save: '+7.7' },
+    ];
+
+    const planCats = [
+      { name: 'Housing', amount: '5,000', fill: 100, color: '#1f6f54' },
+      { name: 'Groceries', amount: '2,400', fill: 48, color: '#7a8b3f' },
+      { name: 'Shopping', amount: '1,500', fill: 30, color: '#8b6b3f' },
+      { name: 'Transport', amount: '1,300', fill: 26, color: '#3f6f8b' },
+      { name: 'Dining', amount: '1,200', fill: 24, color: '#bd5a3c' },
+      { name: 'Utilities', amount: '1,000', fill: 20, color: '#6b7d6f' },
+      { name: 'Health', amount: '800', fill: 16, color: '#8b3f5a' },
+    ];
+
+    const planActual = [
+      { name: 'Housing', actual: '5,000', plan: '5,000', fill: 100, over: false, color: '#1f6f54' },
+      { name: 'Groceries', actual: '1,980', plan: '2,400', fill: 83, over: false, color: '#7a8b3f' },
+      { name: 'Dining', actual: '1,460', plan: '1,200', fill: 100, over: true, color: '#bd5a3c' },
+      { name: 'Transport', actual: '640', plan: '1,300', fill: 49, over: false, color: '#3f6f8b' },
+      { name: 'Utilities', actual: '760', plan: '1,000', fill: 76, over: false, color: '#6b7d6f' },
+      { name: 'Shopping', actual: '0', plan: '1,100', fill: 0, over: false, color: '#8b6b3f' },
+    ].map(c => ({
+      ...c,
+      actColor: c.over ? CLAY : '#15201a',
+      barColor: c.over ? CLAY : c.color,
+    }));
+
+    const goals = [
+      { name: 'Emergency fund', saved: '22,000', target: '25,000', fill: 88, color: '#1f6f54', note: '88% · nearly there' },
+      { name: 'Japan trip', saved: '6,300', target: '15,000', fill: 42, color: '#3f6f8b', note: '42% · AED 1,000/mo' },
+    ];
+
+    const cats = [
+      { name: 'Housing', amount: '60,000', pct: '36%', bar: 100, color: '#1f6f54' },
+      { name: 'Groceries', amount: '28,400', pct: '17%', bar: 47, color: '#7a8b3f' },
+      { name: 'Other', amount: '19,400', pct: '12%', bar: 32, color: '#8a928c' },
+      { name: 'Dining', amount: '18,900', pct: '11%', bar: 31, color: '#bd5a3c' },
+      { name: 'Transport', amount: '14,200', pct: '9%', bar: 24, color: '#3f6f8b' },
+      { name: 'Shopping', amount: '13,600', pct: '8%', bar: 23, color: '#8b6b3f' },
+    ];
+
+    const octCats = [
+      { name: 'Housing', amount: '5,000', bar: 100, color: '#1f6f54' },
+      { name: 'Shopping', amount: '4,300', bar: 86, color: '#8b6b3f' },
+      { name: 'Other', amount: '3,520', bar: 70, color: '#8a928c' },
+      { name: 'Groceries', amount: '2,650', bar: 53, color: '#7a8b3f' },
+      { name: 'Dining', amount: '2,180', bar: 44, color: '#bd5a3c' },
+      { name: 'Transport', amount: '1,250', bar: 25, color: '#3f6f8b' },
+    ];
+
+    const txns = [
+      { name: 'Salary', sub: 'Income · Oct 1', amt: '+18,500', amtColor: GREEN, tint: '#dbeae1' },
+      { name: 'Rent', sub: 'Housing · Oct 1', amt: '−5,000', amtColor: CLAY, tint: '#dbeae1' },
+      { name: 'IKEA', sub: 'Shopping · Oct 24', amt: '−2,150', amtColor: CLAY, tint: '#ece1d2' },
+      { name: 'DEWA', sub: 'Utilities · Oct 15', amt: '−1,020', amtColor: CLAY, tint: '#e1e6e2' },
+      { name: 'Carrefour', sub: 'Groceries · Oct 22', amt: '−418', amtColor: CLAY, tint: '#e6ead7' },
+    ];
+
+    const chartMonths = [
+      { abbr: 'J', h: 62 }, { abbr: 'F', h: 89 }, { abbr: 'M', h: 34 },
+      { abbr: 'A', h: 96 }, { abbr: 'M', h: 47 }, { abbr: 'J', h: 17 },
+      { abbr: 'J', h: 84 }, { abbr: 'A', h: 45 }, { abbr: 'S', h: 59 },
+      { abbr: 'O', h: 5, neg: true }, { abbr: 'N', h: 75 }, { abbr: 'D', h: 47 },
+    ].map(c => ({ ...c, color: c.neg ? CLAY : GREEN }));
+
+    const chips = [
+      { name: 'Groceries', color: '#7a8b3f' },
+      { name: 'Dining', color: '#bd5a3c', active: true },
+      { name: 'Transport', color: '#3f6f8b' },
+      { name: 'Shopping', color: '#8b6b3f' },
+      { name: 'Bills', color: '#6b7d6f' },
+      { name: 'Health', color: '#8b3f5a' },
+    ].map(c => ({
+      ...c,
+      bg: c.active ? '#f7e8e1' : '#ffffff',
+      border: c.active ? '#bd5a3c' : '#ffffff',
+      textColor: c.active ? '#bd5a3c' : '#4a544e',
+    }));
+
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'];
+
+    const incomeSources = [
+      { name: 'Salary', cadence: 'Monthly · 1st', amount: 'AED 18,500', tint: '#dbeae1' },
+      { name: 'Freelance', cadence: 'Avg / month', amount: 'AED 1,200', tint: '#e6ead7' },
+    ];
+
+    const settings = [
+      { name: 'Currency', value: 'AED', tint: '#dbeae1' },
+      { name: 'Monthly reminders', value: 'On', tint: '#e6ead7' },
+      { name: 'Local backup', value: 'Daily', tint: '#e1e6e2' },
+      { name: 'Categories', value: '8', tint: '#ece1d2' },
+      { name: 'Roll over balance', value: 'On', tint: '#efe0e6' },
+    ];
+
+    return { months, yearPlan, planCats, planActual, goals, cats, octCats, txns, chartMonths, chips, keys, incomeSources, settings };
+  }
+}
+</script>
+</body>
+</html>

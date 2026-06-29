@@ -1,0 +1,373 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0FFB130A856ED4CDED44942E /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9916144A58D3A679337CAD04 /* Models.swift */; };
+		4F08887DE6D5B58A9EC1D3C0 /* PlanVsActualView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2901103990A58E6185D4759 /* PlanVsActualView.swift */; };
+		67F31D7BD1B40CEE883BD478 /* YearPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAA264229E93FCF982B8B8E /* YearPlanView.swift */; };
+		740CCAF8B27C9C2581CA9471 /* FinancialPlannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2464C83156AB0316CB4266E4 /* FinancialPlannerApp.swift */; };
+		917AB141AD679A401DEBB60E /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4949E581C094DC07E969F7 /* Components.swift */; };
+		AF33A14AF0DBF21DD2D30352 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8530A026AD2F5DA7B7F89C06 /* SampleData.swift */; };
+		B5E7E3FE0EE503A8424F393A /* MonthPlanEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365011759FF502BD14A10551 /* MonthPlanEditorView.swift */; };
+		D62B07DA8D7F1BCA4532A92C /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC03CAEEC350EC7AB9295E8B /* Theme.swift */; };
+		DB9C586D92283F0314F0B31F /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 549E5F95275704D6C1D8DC01 /* SavingsGoalsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2464C83156AB0316CB4266E4 /* FinancialPlannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialPlannerApp.swift; sourceTree = "<group>"; };
+		25A5F5A364632ABFC6BD37E4 /* FinancialPlanner.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FinancialPlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		365011759FF502BD14A10551 /* MonthPlanEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthPlanEditorView.swift; sourceTree = "<group>"; };
+		549E5F95275704D6C1D8DC01 /* SavingsGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalsView.swift; sourceTree = "<group>"; };
+		6D4949E581C094DC07E969F7 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		8530A026AD2F5DA7B7F89C06 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		9916144A58D3A679337CAD04 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9B2A28945E789F35E0834084 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9CAA264229E93FCF982B8B8E /* YearPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearPlanView.swift; sourceTree = "<group>"; };
+		A2901103990A58E6185D4759 /* PlanVsActualView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanVsActualView.swift; sourceTree = "<group>"; };
+		FC03CAEEC350EC7AB9295E8B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		3EEAAAC7D1C2236D965CAA34 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9916144A58D3A679337CAD04 /* Models.swift */,
+				8530A026AD2F5DA7B7F89C06 /* SampleData.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		446B7E8E3BAD5C8B454D9D17 = {
+			isa = PBXGroup;
+			children = (
+				A442F48BB4C46ACE3AE7C7B0 /* Sources */,
+				76BA2F9199765A7BAD620C75 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		700E2444B69B32906C82D40C /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2464C83156AB0316CB4266E4 /* FinancialPlannerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		76BA2F9199765A7BAD620C75 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				25A5F5A364632ABFC6BD37E4 /* FinancialPlanner.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7A03810FDF9B6DFB45245202 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				7DE5214EF2C8D9427F72EFB8 /* PlanYear */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		7DE5214EF2C8D9427F72EFB8 /* PlanYear */ = {
+			isa = PBXGroup;
+			children = (
+				365011759FF502BD14A10551 /* MonthPlanEditorView.swift */,
+				A2901103990A58E6185D4759 /* PlanVsActualView.swift */,
+				549E5F95275704D6C1D8DC01 /* SavingsGoalsView.swift */,
+				9CAA264229E93FCF982B8B8E /* YearPlanView.swift */,
+			);
+			path = PlanYear;
+			sourceTree = "<group>";
+		};
+		A12FF352997339ECAED7821E /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				6D4949E581C094DC07E969F7 /* Components.swift */,
+				FC03CAEEC350EC7AB9295E8B /* Theme.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A442F48BB4C46ACE3AE7C7B0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				9B2A28945E789F35E0834084 /* Info.plist */,
+				700E2444B69B32906C82D40C /* App */,
+				A12FF352997339ECAED7821E /* DesignSystem */,
+				7A03810FDF9B6DFB45245202 /* Features */,
+				3EEAAAC7D1C2236D965CAA34 /* Models */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1B669B6A879D85AC500A4B5A /* FinancialPlanner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E975876A2B1ECB5BA695613A /* Build configuration list for PBXNativeTarget "FinancialPlanner" */;
+			buildPhases = (
+				DDAC9FC7A07CD9728D306B61 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FinancialPlanner;
+			packageProductDependencies = (
+			);
+			productName = FinancialPlanner;
+			productReference = 25A5F5A364632ABFC6BD37E4 /* FinancialPlanner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F414BF88D815DE1921E2DAD2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1B669B6A879D85AC500A4B5A = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 5C3C19DFE40D939185565A98 /* Build configuration list for PBXProject "FinancialPlanner" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 446B7E8E3BAD5C8B454D9D17;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 76BA2F9199765A7BAD620C75 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1B669B6A879D85AC500A4B5A /* FinancialPlanner */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DDAC9FC7A07CD9728D306B61 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				917AB141AD679A401DEBB60E /* Components.swift in Sources */,
+				740CCAF8B27C9C2581CA9471 /* FinancialPlannerApp.swift in Sources */,
+				0FFB130A856ED4CDED44942E /* Models.swift in Sources */,
+				B5E7E3FE0EE503A8424F393A /* MonthPlanEditorView.swift in Sources */,
+				4F08887DE6D5B58A9EC1D3C0 /* PlanVsActualView.swift in Sources */,
+				AF33A14AF0DBF21DD2D30352 /* SampleData.swift in Sources */,
+				DB9C586D92283F0314F0B31F /* SavingsGoalsView.swift in Sources */,
+				D62B07DA8D7F1BCA4532A92C /* Theme.swift in Sources */,
+				67F31D7BD1B40CEE883BD478 /* YearPlanView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DD9ABEAC81D9934B0215C4D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		2DFF3F2ACAD04532F49BB6BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		462777B187335CF326D359EA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.financialplanner.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		633F4FDA212EFE0BCA9714A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.financialplanner.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5C3C19DFE40D939185565A98 /* Build configuration list for PBXProject "FinancialPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DD9ABEAC81D9934B0215C4D /* Debug */,
+				2DFF3F2ACAD04532F49BB6BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E975876A2B1ECB5BA695613A /* Build configuration list for PBXNativeTarget "FinancialPlanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				462777B187335CF326D359EA /* Debug */,
+				633F4FDA212EFE0BCA9714A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F414BF88D815DE1921E2DAD2 /* Project object */;
+}
