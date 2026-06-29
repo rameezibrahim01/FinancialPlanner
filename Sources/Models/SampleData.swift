@@ -23,6 +23,13 @@ enum SampleData {
     static let monthlyBudgetTotal: [Double] =
         [13000,13000,13200,14000,13000,12000,13900,13000,13000,13900,13000,16300]
 
+    // Fraction of each month's category budgets actually spent (drives the Track
+    // and Review lanes). June is a sentinel (0) because its actuals are listed
+    // explicitly below; October is > 1 so it lands over budget / net-negative,
+    // matching the handoff's "only Oct over" narrative.
+    static let monthlyActualFill: [Double] =
+        [0.82,0.88,0.80,0.74,0.92,0,0.86,0.90,0.78,1.36,1.14,0.96]
+
     // The 8 categories with their authoritative accent colors.
     static let categories: [(String, String)] = [
         ("Housing", Theme.CategoryColor.housing),
@@ -100,6 +107,7 @@ enum SampleData {
                                     amount: 1200, recurring: true, tintHex: "#e6ead7"))
 
         // Month plans
+        var monthPlans: [MonthPlan] = []
         for m in 1...12 {
             let income = monthlyIncome[m - 1]
             let total = monthlyBudgetTotal[m - 1]
@@ -112,17 +120,35 @@ enum SampleData {
             let budgetModels = defs.enumerated().map { idx, d in
                 CategoryBudget(categoryName: d.0, colorHex: d.1, amount: d.2, order: idx)
             }
-            context.insert(MonthPlan(year: year, month: m, plannedIncome: income, budgets: budgetModels))
+            let plan = MonthPlan(year: year, month: m, plannedIncome: income, budgets: budgetModels)
+            context.insert(plan)
+            monthPlans.append(plan)
         }
 
-        // June actual transactions
-        for (i, (cat, amt)) in juneActuals.enumerated() {
-            context.insert(Transaction(type: .expense, amount: amt, categoryName: cat,
-                                       date: date(year, 6, 3 + i),
-                                       note: "\(cat) spend"))
+        // Actual transactions for the whole year — the source of truth for the
+        // Track/Review lanes. Each month gets a salary income plus per-category
+        // expenses at that month's fill fraction. June keeps its exact handoff
+        // actuals; October is intentionally over budget.
+        for plan in monthPlans {
+            let m = plan.month
+            context.insert(Transaction(type: .income, amount: 18500, categoryName: "Salary",
+                                       date: date(year, m, 1), note: "Salary"))
+            if m == 6 {
+                for (i, (cat, amt)) in juneActuals.enumerated() {
+                    context.insert(Transaction(type: .expense, amount: amt, categoryName: cat,
+                                               date: date(year, 6, 3 + i), note: "\(cat) spend"))
+                }
+                continue
+            }
+            let fill = monthlyActualFill[m - 1]
+            for (i, b) in plan.orderedBudgets.enumerated() {
+                let amt = (b.amount * fill / 10).rounded() * 10
+                guard amt > 0 else { continue }
+                context.insert(Transaction(type: .expense, amount: amt, categoryName: b.categoryName,
+                                           date: date(year, m, min(27, 4 + i * 3)),
+                                           note: b.categoryName))
+            }
         }
-        context.insert(Transaction(type: .income, amount: 18500, categoryName: "Salary",
-                                   date: date(year, 6, 1), note: "Salary"))
 
         // Goals
         context.insert(Goal(name: "New car", target: 60000, saved: 38400,

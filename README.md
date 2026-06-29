@@ -6,7 +6,7 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 
 ## Status
 
-**Lane 2 — Plan the year** is implemented end-to-end:
+**Lane 2 — Plan the year** and **Lane 3 — Track** are implemented end-to-end:
 
 | Screen | View | Notes |
 |---|---|---|
@@ -14,10 +14,21 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 | B2 · Month Plan editor ★ | `MonthPlanEditorView` | live planned-savings + allocation meter, draggable category sliders, over-allocation warning |
 | B3 · Plan vs Actual | `PlanVsActualView` | per-category actual/plan bars from transactions, ON TRACK/OVER status |
 | B4 · Savings goals | `SavingsGoalsView` | progress ring, pace note, goal list |
+| C1 · Dashboard (home) | `DashboardView` | net-saved card, 12-month at-a-glance grid, custom bottom tab bar |
+| C2 · Monthly breakdown | `MonthlyBreakdownView` | net + income/spent split bar, "where it went" category bars, recent transactions |
+| C3 · Add transaction | `AddTransactionView` | Expense/Income segmented control, amount display, category chips, numeric keypad |
 
-Lanes 1 (Set up), 3 (Track) and 4 (Review) are not built yet. The app currently
-launches into the Year Plan; B2 is reached by tapping a month, B3 from inside B2,
-and B4 from the "Goals" toolbar button.
+The app now launches into the **Dashboard** (Year tab). The bottom tab bar hosts
+Year (Dashboard), Plan (Year Plan → B2 → B3), a center **+** that presents Add
+Transaction (C3), and Charts / Settings placeholders. Tapping a month on the
+Dashboard opens its breakdown (C2). B4 is reached from the "Goals" toolbar button
+inside the Plan tab.
+
+Lane 1 (Set up) and Lane 4 (Review — Charts & Settings) are not built yet; the
+Charts and Settings tabs show a "coming soon" placeholder. The store now seeds a
+full year of actual transactions (salary income + per-category expenses; October
+is intentionally over budget) so the Track screens have data to display, while
+keeping June's exact plan-vs-actual figures.
 
 ## Project layout
 

@@ -19,18 +19,8 @@ struct FinancialPlannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootTabView()
         }
         .modelContainer(container)
-    }
-}
-
-/// Roots the app at the Plan-the-year flow (the lane implemented first).
-struct RootView: View {
-    var body: some View {
-        NavigationStack {
-            YearPlanView()
-        }
-        .tint(Theme.Palette.green)
     }
 }
