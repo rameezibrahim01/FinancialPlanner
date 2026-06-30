@@ -111,6 +111,103 @@ final class Transaction {
     var type: TxType { TxType(rawValue: typeRaw) ?? .expense }
 }
 
+// MARK: - Recurring bill / subscription (V2-1)
+
+enum RecurringCadence: String, Codable, CaseIterable {
+    case monthly, quarterly, annual
+
+    var label: String {
+        switch self {
+        case .monthly: return "monthly"
+        case .quarterly: return "quarterly"
+        case .annual: return "annual"
+        }
+    }
+    /// Months between charges — used to amortize into a monthly equivalent.
+    var months: Double {
+        switch self {
+        case .monthly: return 1
+        case .quarterly: return 3
+        case .annual: return 12
+        }
+    }
+}
+
+@Model
+final class Recurring {
+    var id: UUID
+    var name: String
+    var amount: Double
+    var categoryName: String
+    var colorHex: String
+    var tintHex: String
+    var cadenceRaw: String
+    var dueDay: Int           // 1...28
+    var autoPost: Bool
+    var order: Int
+
+    init(name: String, amount: Double, categoryName: String, colorHex: String,
+         tintHex: String, cadence: RecurringCadence, dueDay: Int, autoPost: Bool, order: Int) {
+        self.id = UUID()
+        self.name = name
+        self.amount = amount
+        self.categoryName = categoryName
+        self.colorHex = colorHex
+        self.tintHex = tintHex
+        self.cadenceRaw = cadence.rawValue
+        self.dueDay = dueDay
+        self.autoPost = autoPost
+        self.order = order
+    }
+
+    var cadence: RecurringCadence { RecurringCadence(rawValue: cadenceRaw) ?? .monthly }
+    /// Amount spread across a month for budgeting (annual/quarterly amortized).
+    var monthlyEquivalent: Double { amount / cadence.months }
+    /// English ordinal for the due day, e.g. "1st", "22nd".
+    var dueLabel: String { Self.ordinal(dueDay) }
+
+    static func ordinal(_ n: Int) -> String {
+        let ones = n % 10, tens = (n / 10) % 10
+        let suffix: String
+        if tens == 1 { suffix = "th" }
+        else { switch ones { case 1: suffix = "st"; case 2: suffix = "nd"; case 3: suffix = "rd"; default: suffix = "th" } }
+        return "\(n)\(suffix)"
+    }
+}
+
+// MARK: - Debt (V2-3)
+
+@Model
+final class Debt {
+    var id: UUID
+    var name: String
+    var balance: Double
+    var openingBalance: Double
+    var apr: Double           // annual percentage rate, e.g. 21 for 21%
+    var monthlyPayment: Double
+    var colorHex: String
+    var tintHex: String
+    var order: Int
+
+    init(name: String, balance: Double, openingBalance: Double, apr: Double,
+         monthlyPayment: Double, colorHex: String, tintHex: String, order: Int) {
+        self.id = UUID()
+        self.name = name
+        self.balance = balance
+        self.openingBalance = openingBalance
+        self.apr = apr
+        self.monthlyPayment = monthlyPayment
+        self.colorHex = colorHex
+        self.tintHex = tintHex
+        self.order = order
+    }
+
+    var fill: Double { openingBalance > 0 ? max(0, min(1, 1 - balance / openingBalance)) : 0 }
+    var percentPaid: Int { Int((fill * 100).rounded()) }
+    /// High-rate debts are surfaced in clay.
+    var isHighRate: Bool { apr >= 15 }
+}
+
 // MARK: - Savings goal
 
 @Model

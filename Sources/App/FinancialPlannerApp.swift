@@ -9,7 +9,8 @@ struct FinancialPlannerApp: App {
         do {
             container = try ModelContainer(
                 for: Category.self, IncomeSource.self, CategoryBudget.self,
-                MonthPlan.self, Transaction.self, Goal.self
+                MonthPlan.self, Transaction.self, Goal.self,
+                Recurring.self, Debt.self
             )
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")

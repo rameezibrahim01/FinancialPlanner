@@ -32,6 +32,13 @@ struct YearPlanView: View {
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink {
+                    RecurringView()
+                } label: {
+                    Text("Recurring").font(.ui(15, .semibold)).foregroundStyle(Theme.Palette.green)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
                     SavingsGoalsView()

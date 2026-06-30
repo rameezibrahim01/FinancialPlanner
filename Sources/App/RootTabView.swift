@@ -7,7 +7,7 @@ enum AppTab: CaseIterable {
 
     var title: String {
         switch self {
-        case .year: return "Year at a glance"
+        case .year: return "Home"
         case .plan: return "Plan the year"
         case .charts: return "Charts & trends"
         case .settings: return "Year in review"
@@ -15,7 +15,7 @@ enum AppTab: CaseIterable {
     }
     var shortTitle: String {
         switch self {
-        case .year: return "Year"
+        case .year: return "Home"
         case .plan: return "Plan"
         case .charts: return "Charts"
         case .settings: return "Settings"
@@ -23,7 +23,7 @@ enum AppTab: CaseIterable {
     }
     var icon: String {
         switch self {
-        case .year: return "calendar"
+        case .year: return "house"
         case .plan: return "square.grid.2x2"
         case .charts: return "chart.bar"
         case .settings: return "gearshape"

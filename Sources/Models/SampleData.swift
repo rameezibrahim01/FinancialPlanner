@@ -17,6 +17,15 @@ enum SampleData {
         cal().date(from: DateComponents(year: year, month: month, day: day)) ?? Date()
     }
 
+    /// The date the Track/Safe-to-spend screens treat as "today". Uses the real
+    /// date when the device clock is in the seed year, otherwise falls back to
+    /// mid-June of the seed year so the demo always has data to show.
+    static var referenceToday: Date {
+        let now = Date()
+        if cal().component(.year, from: now) == year { return now }
+        return date(year, 6, 15)
+    }
+
     // Per-month planned income & budget totals (AED). Sums: 230,000 / 161,300.
     static let monthlyIncome: [Double] =
         [18500,18500,18500,21000,18500,18500,18500,18500,18500,18500,18500,24000]
@@ -148,6 +157,36 @@ enum SampleData {
                                            date: date(year, m, min(27, 4 + i * 3)),
                                            note: b.categoryName))
             }
+        }
+
+        // Recurring bills & subscriptions (V2-1) — matches the V2 design figures.
+        let sub = "#8b6b3f"   // subscriptions reuse the shopping accent
+        let recurring: [(String, Double, String, String, String, Int)] = [
+            ("Rent", 5000, "Housing", Theme.CategoryColor.housing, "#dbeae1", 1),
+            ("School fees", 1200, "Other", Theme.CategoryColor.other, "#e6ead7", 5),
+            ("Car insurance", 450, "Transport", Theme.CategoryColor.transport, "#dde6ea", 8),
+            ("DEWA", 620, "Utilities", Theme.CategoryColor.utilities, "#e1e6e2", 15),
+            ("Etisalat", 389, "Utilities", Theme.CategoryColor.utilities, "#e1e6e2", 5),
+            ("Gym", 250, "Health", Theme.CategoryColor.health, "#efe0e6", 10),
+            ("Netflix", 56, "Subscriptions", sub, "#ece1d2", 12),
+            ("Spotify", 21, "Subscriptions", sub, "#ece1d2", 18),
+            ("iCloud", 12, "Subscriptions", sub, "#ece1d2", 22),
+        ]
+        for (i, r) in recurring.enumerated() {
+            context.insert(Recurring(name: r.0, amount: r.1, categoryName: r.2, colorHex: r.3,
+                                     tintHex: r.4, cadence: .monthly, dueDay: r.5,
+                                     autoPost: true, order: i))
+        }
+
+        // Debts (V2-3) — matches the V2 design figures.
+        let debts: [(String, Double, Double, Double, Double, String, String)] = [
+            ("Car loan", 28400, 60000, 4.2, 1650, Theme.CategoryColor.housing, "#dde6ea"),
+            ("Credit card", 9900, 15000, 21, 1200, "#bd5a3c", "#f7e8e1"),
+            ("Phone plan", 4000, 10000, 0, 300, Theme.CategoryColor.groceries, "#e6ead7"),
+        ]
+        for (i, d) in debts.enumerated() {
+            context.insert(Debt(name: d.0, balance: d.1, openingBalance: d.2, apr: d.3,
+                                monthlyPayment: d.4, colorHex: d.5, tintHex: d.6, order: i))
         }
 
         // Goals
