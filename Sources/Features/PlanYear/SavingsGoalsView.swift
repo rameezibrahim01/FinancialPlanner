@@ -15,6 +15,7 @@ struct SavingsGoalsView: View {
                 header
                 if let hero { HeroGoalCard(goal: hero) }
                 ForEach(others, id: \.persistentModelID) { OtherGoalCard(goal: $0) }
+                debtLink
                 DashedAddTile(title: "+ New goal", action: addGoal)
             }
             .padding(.horizontal, Theme.Spacing.side)
@@ -33,6 +34,31 @@ struct SavingsGoalsView: View {
             Text("Goals").font(.ui(26, .heavy)).kerning(-0.6).foregroundStyle(Theme.Palette.ink)
         }
         .padding(.horizontal, 4)
+    }
+
+    private var debtLink: some View {
+        NavigationLink {
+            DebtPayoffView()
+        } label: {
+            Card(padding: 16, radius: 16) {
+                HStack(spacing: 12) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Theme.Palette.claySoft).frame(width: 34, height: 34)
+                        .overlay(Image(systemName: "creditcard")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.Palette.clay))
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Debt payoff").font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
+                        Text("Track balances & projected payoff")
+                            .font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color(hex: "#cdd2cb"))
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func addGoal() {
