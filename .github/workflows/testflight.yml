@@ -1,0 +1,63 @@
+name: TestFlight
+
+# Runs on every merge/push to main (the automation you asked for), plus a
+# manual trigger you can use to run the one-time `certificates` lane or to
+# re-ship on demand.
+#
+# NOTE: this workflow stays dormant until (a) it lives on the default branch and
+# (b) the secrets below are set and a paid Apple Developer account exists. See
+# docs/TESTFLIGHT_SETUP.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Resources/**'
+      - 'project.yml'
+      - 'fastlane/**'
+      - 'Gemfile*'
+      - '.github/workflows/testflight.yml'
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Fastlane lane (beta = build+upload, certificates = one-time signing setup)"
+        default: "beta"
+        required: true
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Set up Ruby + cache gems
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Run fastlane
+        run: bundle exec fastlane ${{ github.event.inputs.lane || 'beta' }}
+        env:
+          APP_IDENTIFIER: com.presight.financialplanner
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_AUTH }}

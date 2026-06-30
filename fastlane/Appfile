@@ -1,0 +1,13 @@
+# App identity. Apple-account-specific values come from the environment / GitHub
+# secrets so nothing private is committed. Fill the secrets in once the Apple
+# Developer account exists (see docs/TESTFLIGHT_SETUP.md).
+
+app_identifier(ENV["APP_IDENTIFIER"] || "com.presight.financialplanner")
+
+# Apple Developer "Team ID" (10 chars) and App Store Connect team id.
+# Provided via env in CI; harmless to leave nil locally until set.
+team_id(ENV["TEAM_ID"])
+itc_team_id(ENV["ITC_TEAM_ID"])
+
+# We authenticate with an App Store Connect API key (not an Apple ID), so no
+# apple_id / password is needed here.
