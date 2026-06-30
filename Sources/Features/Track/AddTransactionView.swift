@@ -14,10 +14,18 @@ struct AddTransactionView: View {
     @State private var selectedCategory = ""
     @State private var note = ""
     @State private var caretOn = true
+    @FocusState private var noteFocused: Bool
 
     private var accent: Color { type == .income ? Theme.Palette.green : Theme.Palette.clay }
     private var amount: Double { Double(amountString) ?? 0 }
-    private var canSave: Bool { amount > 0 && !selectedCategory.isEmpty }
+    /// The selected chip, falling back to the first available chip so a valid
+    /// category is always chosen once chips exist (the categories query can be
+    /// empty on the first render, which previously left Save disabled).
+    private var effectiveCategory: String {
+        if chips.contains(where: { $0.name == selectedCategory }) { return selectedCategory }
+        return chips.first?.name ?? ""
+    }
+    private var canSave: Bool { amount > 0 && !effectiveCategory.isEmpty }
 
     /// Chips depend on the entry type: real categories for expenses, a small
     /// income set otherwise.
@@ -46,11 +54,18 @@ struct AddTransactionView: View {
                 .padding(.horizontal, Theme.Spacing.side)
                 .padding(.top, 8)
             }
+            .scrollDismissesKeyboard(.interactively)
             keypad
         }
         .frame(maxWidth: 520)
         .frame(maxWidth: .infinity)
         .background(Theme.Palette.page.ignoresSafeArea())
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { noteFocused = false }
+            }
+        }
         .onAppear(perform: syncSelection)
         .onChange(of: type) { _, _ in syncSelection() }
     }
@@ -136,7 +151,7 @@ struct AddTransactionView: View {
     private var chipGrid: some View {
         LazyVGrid(columns: keyColumns, spacing: 10) {
             ForEach(chips, id: \.name) { chip in
-                let active = selectedCategory == chip.name
+                let active = effectiveCategory == chip.name
                 Button {
                     selectedCategory = chip.name
                 } label: {
@@ -180,6 +195,9 @@ struct AddTransactionView: View {
                     Text("Note").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
                     Spacer()
                     TextField("Add a note", text: $note)
+                        .focused($noteFocused)
+                        .submitLabel(.done)
+                        .onSubmit { noteFocused = false }
                         .font(.ui(13, .semibold))
                         .multilineTextAlignment(.trailing)
                         .foregroundStyle(Theme.Palette.ink)
@@ -254,7 +272,7 @@ struct AddTransactionView: View {
 
     private func save() {
         guard canSave else { return }
-        let txn = Transaction(type: type, amount: amount, categoryName: selectedCategory,
+        let txn = Transaction(type: type, amount: amount, categoryName: effectiveCategory,
                               date: Date(), note: note.trimmingCharacters(in: .whitespaces))
         context.insert(txn)
         try? context.save()

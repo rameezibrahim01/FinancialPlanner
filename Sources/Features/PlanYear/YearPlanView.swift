@@ -152,8 +152,26 @@ struct YearPlanView: View {
     private var footer: some View {
         HStack(spacing: 12) {
             SecondaryButton(title: "Copy to all months", action: copyToAllMonths)
-            PrimaryButton(title: "Edit a month") { /* taps go through rows */ }
+            if let plan = defaultMonthPlan {
+                NavigationLink {
+                    MonthPlanEditorView(plan: plan)
+                } label: {
+                    Text("Edit a month")
+                        .font(.ui(16, .bold)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).padding(16)
+                        .background(Theme.Palette.green)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+                        .appShadow(.primaryButton)
+                }
+                .buttonStyle(.plain)
+            }
         }
+    }
+
+    /// The month "Edit a month" jumps to — the current month, else the first.
+    private var defaultMonthPlan: MonthPlan? {
+        let m = SampleData.cal().component(.month, from: SampleData.referenceToday)
+        return plans.first { $0.month == m } ?? plans.first
     }
 
     /// Applies the current (March) month's category budgets to every month.
