@@ -1,32 +1,4 @@
 import SwiftUI
-import UIKit
-
-// MARK: - Keyboard dismissal
-//
-// Numeric keyboards (.decimalPad / .numberPad) have no return key, so amount
-// fields need an explicit way out. `amountKeyboardDismissal()` adds a "Done"
-// bar above the keyboard and lets a scroll/drag dismiss it.
-
-enum KeyboardDismiss {
-    static func resign() {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
-
-extension View {
-    func amountKeyboardDismissal() -> some View {
-        self
-            .scrollDismissesKeyboard(.interactively)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { KeyboardDismiss.resign() }
-                        .fontWeight(.semibold)
-                }
-            }
-    }
-}
 
 // MARK: - Card container
 

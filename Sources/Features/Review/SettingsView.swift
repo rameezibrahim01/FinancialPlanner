@@ -62,7 +62,6 @@ struct SettingsView: View {
         }
         .screenBackground()
         .navBarHiddenInCompact()
-        .amountKeyboardDismissal()
     }
 
     // MARK: Header

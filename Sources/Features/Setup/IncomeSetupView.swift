@@ -32,7 +32,6 @@ struct IncomeSetupView: View {
                 .padding(.bottom, Theme.Spacing.bottomSafe)
                 .readableContent(640)
             }
-            .amountKeyboardDismissal()
             footer
         }
         .screenBackground()
@@ -181,7 +180,6 @@ private struct AddIncomeSheet: View {
             }
             .navigationTitle("Add income")
             .navigationBarTitleDisplayMode(.inline)
-            .amountKeyboardDismissal()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
