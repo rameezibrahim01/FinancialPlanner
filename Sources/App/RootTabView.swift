@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// The app sections. On iPhone these are the bottom-tab-bar items; on iPad they
 /// are the sidebar entries. The center "Add" is an action, not a section.
@@ -59,71 +58,94 @@ func sectionView(for tab: AppTab) -> some View {
     }
 }
 
-// MARK: - iPhone shell (system tab bar + raised Add button)
+// MARK: - iPhone shell (custom bottom tab bar)
 
 private struct PhoneTabShell: View {
     @State private var tab: AppTab = .year
     @State private var showAdd = false
 
-    /// Styles the system tab bar to match the design (page-colored background,
-    /// hairline top border, green selected / faint unselected items).
-    init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(Theme.Palette.page)
-        appearance.shadowColor = UIColor(Theme.Palette.borderAlt)
-        let faint = UIColor(Theme.Palette.faint)
-        let green = UIColor(Theme.Palette.green)
-        for layout in [appearance.stackedLayoutAppearance,
-                       appearance.inlineLayoutAppearance,
-                       appearance.compactInlineLayoutAppearance] {
-            layout.normal.iconColor = faint
-            layout.normal.titleTextAttributes = [.foregroundColor: faint]
-            layout.selected.iconColor = green
-            layout.selected.titleTextAttributes = [.foregroundColor: green]
-        }
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
-
     var body: some View {
-        GeometryReader { geo in
-            TabView(selection: $tab) {
-                NavigationStack { DashboardView() }
-                    .tabItem { Label("Year", systemImage: "calendar") }
-                    .tag(AppTab.year)
-                NavigationStack { YearPlanView() }
-                    .tabItem { Label("Plan", systemImage: "square.grid.2x2") }
-                    .tag(AppTab.plan)
-                NavigationStack { ChartsView() }
-                    .tabItem { Label("Charts", systemImage: "chart.bar") }
-                    .tag(AppTab.charts)
-                NavigationStack { SettingsView() }
-                    .tabItem { Label("Settings", systemImage: "gearshape") }
-                    .tag(AppTab.settings)
-            }
-            .tint(Theme.Palette.green)
-            // Raised center Add button, drawn on top of the tab bar (so the bar's
-            // hairline never crosses it) and lifted to poke above the bar.
-            .overlay(alignment: .bottom) {
-                addButton
-                    .padding(.bottom, geo.safeAreaInsets.bottom + 18)
-            }
+        NavigationStack {
+            // The bar is applied INSIDE the NavigationStack, on the root screen,
+            // so it reliably reserves scroll inset. Pushed detail screens cover
+            // it and use their own back button (matching the design).
+            currentScreen
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    CustomTabBar(selected: $tab) { showAdd = true }
+                }
         }
+        .tint(Theme.Palette.green)
         .sheet(isPresented: $showAdd) {
             AddTransactionView()
         }
     }
 
+    @ViewBuilder private var currentScreen: some View {
+        switch tab {
+        case .year:     DashboardView()
+        case .plan:     YearPlanView()
+        case .charts:   ChartsView()
+        case .settings: SettingsView()
+        }
+    }
+}
+
+// MARK: - Custom bottom tab bar with integrated raised Add button
+
+private struct CustomTabBar: View {
+    @Binding var selected: AppTab
+    var onAdd: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            item(.year)
+            item(.plan)
+            Spacer().frame(width: 72)   // center slot for the raised +
+            item(.charts)
+            item(.settings)
+        }
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .padding(.horizontal, 4)
+        .frame(maxWidth: .infinity)
+        // Page-colored bar that extends under the home indicator.
+        .background(Theme.Palette.page.ignoresSafeArea(edges: .bottom))
+        // Hairline first…
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.Palette.borderAlt).frame(height: 1)
+        }
+        // …then the raised + ON TOP of it, so the line never crosses the button.
+        .overlay(alignment: .top) {
+            addButton.offset(y: -22)
+        }
+    }
+
+    private func item(_ t: AppTab) -> some View {
+        let active = selected == t
+        return Button {
+            selected = t
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: t.icon)
+                    .font(.system(size: 18, weight: active ? .semibold : .regular))
+                Text(t.shortTitle)
+                    .font(.ui(11, active ? .bold : .regular))
+            }
+            .foregroundStyle(active ? Theme.Palette.green : Theme.Palette.faint)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+    }
+
     private var addButton: some View {
-        Button { showAdd = true } label: {
+        Button(action: onAdd) {
             Image(systemName: "plus")
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 54, height: 54)
                 .background(Theme.Palette.green)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Theme.Palette.page, lineWidth: 3))
+                .overlay(Circle().stroke(Theme.Palette.page, lineWidth: 4))
                 .appShadow(.tabButton)
         }
         .buttonStyle(.plain)
