@@ -26,6 +26,8 @@
 		B1B1B1B1B1B1B1B1B1B1B108 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A108 /* WelcomeView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B109 /* IncomeSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A109 /* IncomeSetupView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B110 /* RecurringView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A110 /* RecurringView.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B111 /* Backup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A111 /* Backup.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B112 /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A112 /* BackupView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +52,8 @@
 		A1A1A1A1A1A1A1A1A1A1A108 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A109 /* IncomeSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeSetupView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A110 /* RecurringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringView.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A111 /* Backup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backup.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A112 /* BackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -122,6 +126,8 @@
 			children = (
 				A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */,
 				A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */,
+				A1A1A1A1A1A1A1A1A1A1A111 /* Backup.swift */,
+				A1A1A1A1A1A1A1A1A1A1A112 /* BackupView.swift */,
 			);
 			path = Review;
 			sourceTree = "<group>";
@@ -245,6 +251,8 @@
 				B1B1B1B1B1B1B1B1B1B1B108 /* WelcomeView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B109 /* IncomeSetupView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B110 /* RecurringView.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B111 /* Backup.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B112 /* BackupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

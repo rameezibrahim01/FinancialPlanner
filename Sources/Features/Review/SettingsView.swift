@@ -8,14 +8,11 @@ struct SettingsView: View {
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Category.order) private var categories: [Category]
-    @Query(sort: \Goal.order) private var goals: [Goal]
 
-    private let year = SampleData.year
     private let yearSavingsGoal: Double = 60000
 
     @State private var remindersOn = true
     @State private var rollOverOn = true
-    @State private var backupURL: URL?
 
     // MARK: Derived
 
@@ -53,7 +50,6 @@ struct SettingsView: View {
                 header
                 statGrid
                 settingsList
-                exportButton
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
@@ -62,7 +58,6 @@ struct SettingsView: View {
         }
         .screenBackground()
         .navBarHiddenInCompact()
-        .task { backupURL = try? Backup.write(plans: plans, txns: txns, goals: goals, year: year) }
     }
 
     // MARK: Header
@@ -128,7 +123,12 @@ struct SettingsView: View {
                     divider
                     toggleRow("Monthly reminders", isOn: $remindersOn, tint: Theme.Palette.greenSoft2, icon: "bell")
                     divider
-                    valueRow("Local backup", "Daily", tint: Theme.Palette.greenSoft3, icon: "externaldrive")
+                    NavigationLink {
+                        BackupView()
+                    } label: {
+                        valueRow("Backup & data", "", tint: Theme.Palette.greenSoft3, icon: "externaldrive")
+                    }
+                    .buttonStyle(.plain)
                     divider
                     valueRow("Categories", "\(categories.count)", tint: Theme.Palette.claySoft, icon: "square.grid.2x2")
                     divider
@@ -172,64 +172,4 @@ struct SettingsView: View {
         .padding(.vertical, 10).padding(.horizontal, 10)
     }
 
-    // MARK: Export
-
-    @ViewBuilder private var exportButton: some View {
-        if let backupURL {
-            ShareLink(item: backupURL) {
-                Text("Export backup file")
-                    .font(.ui(16, .bold)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).padding(16)
-                    .background(Theme.Palette.green)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
-                    .appShadow(.primaryButton)
-            }
-        } else {
-            Text("Preparing backup…")
-                .font(.ui(14)).foregroundStyle(Theme.Palette.muted)
-                .frame(maxWidth: .infinity).padding(16)
-        }
-    }
-}
-
-// MARK: - Backup serialization (offline JSON snapshot)
-
-enum Backup {
-    struct Snapshot: Codable {
-        struct Tx: Codable { var type: String; var amount: Double; var category: String; var date: Date; var note: String }
-        struct Budget: Codable { var category: String; var amount: Double }
-        struct Plan: Codable { var year: Int; var month: Int; var plannedIncome: Double; var budgets: [Budget] }
-        struct GoalSnap: Codable { var name: String; var target: Double; var saved: Double; var monthlyContribution: Double }
-        var exportedYear: Int
-        var transactions: [Tx]
-        var plans: [Plan]
-        var goals: [GoalSnap]
-    }
-
-    /// Serializes all data to a JSON file in the temp directory and returns its URL.
-    static func write(plans: [MonthPlan], txns: [Transaction], goals: [Goal], year: Int) throws -> URL {
-        let snapshot = Snapshot(
-            exportedYear: year,
-            transactions: txns.map {
-                .init(type: $0.type.rawValue, amount: $0.amount, category: $0.categoryName,
-                      date: $0.date, note: $0.note)
-            },
-            plans: plans.map { p in
-                .init(year: p.year, month: p.month, plannedIncome: p.plannedIncome,
-                      budgets: p.orderedBudgets.map { .init(category: $0.categoryName, amount: $0.amount) })
-            },
-            goals: goals.map {
-                .init(name: $0.name, target: $0.target, saved: $0.saved,
-                      monthlyContribution: $0.monthlyContribution)
-            }
-        )
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
-        let data = try encoder.encode(snapshot)
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("FinancialPlanner-\(year)-backup.json")
-        try data.write(to: url, options: .atomic)
-        return url
-    }
 }
