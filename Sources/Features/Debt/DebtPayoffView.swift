@@ -213,6 +213,7 @@ private struct AddDebtSheet: View {
             }
             .navigationTitle("Add debt")
             .navigationBarTitleDisplayMode(.inline)
+            .amountKeyboardDismissal()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {

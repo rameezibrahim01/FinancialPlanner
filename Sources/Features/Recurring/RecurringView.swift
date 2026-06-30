@@ -189,6 +189,7 @@ private struct AddRecurringSheet: View {
             }
             .navigationTitle("Add recurring")
             .navigationBarTitleDisplayMode(.inline)
+            .amountKeyboardDismissal()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {
