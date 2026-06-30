@@ -7,6 +7,13 @@ import SwiftData
 enum SampleData {
     static let year = 2026
 
+    /// Master switch for the demo/sample data. Set to `false` to ship an empty
+    /// app that starts with no plans, transactions, goals, recurring or debts —
+    /// the user builds everything from onboarding. Note: this only controls
+    /// *first-launch* seeding; data already seeded on a device persists until
+    /// the store is cleared (delete the app, or restore an empty backup).
+    static let seedSampleData = true
+
     static func cal() -> Calendar {
         var c = Calendar(identifier: .gregorian)
         c.timeZone = TimeZone(identifier: "Asia/Dubai") ?? .current
@@ -101,6 +108,7 @@ enum SampleData {
 
     @MainActor
     static func seedIfNeeded(_ context: ModelContext) {
+        guard seedSampleData else { return }
         let existing = (try? context.fetch(FetchDescriptor<MonthPlan>())) ?? []
         guard existing.isEmpty else { return }
 
