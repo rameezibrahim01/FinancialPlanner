@@ -1,0 +1,12 @@
+# fastlane match — stores the distribution certificate + provisioning profile in
+# a PRIVATE git repo (encrypted with MATCH_PASSWORD). This lets CI sign builds
+# without a Mac and without checking secrets into this repo.
+#
+# Set MATCH_GIT_URL to your private certificates repo (e.g.
+# https://github.com/<you>/ios-certificates.git). See docs/TESTFLIGHT_SETUP.md.
+
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+
+type("appstore")
+app_identifier([ENV["APP_IDENTIFIER"] || "com.presight.financialplanner"])

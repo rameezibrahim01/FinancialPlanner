@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+</style>
+</helmet>
+
+<!-- ===== CANVAS TITLE ===== -->
+<div style="position:absolute;left:60px;top:34px;width:1300px">
+  <div style="font-family:'Hanken Grotesk',system-ui;font-size:32px;font-weight:800;color:#15201a;letter-spacing:-0.7px">Yearly Finance Planner — V2 additions</div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8a928c;margin-top:8px;letter-spacing:0.3px">NEW SCREENS FOR V2 · SAME CALM-GREEN SYSTEM · V1 IS ALREADY BUILT</div>
+</div>
+
+<!-- ===== LANE HEADER ===== -->
+<div style="position:absolute;left:60px;top:150px;width:2000px;display:flex;align-items:center;gap:14px;font-family:'Hanken Grotesk',system-ui">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1f6f54;font-weight:600;border:1px solid #cfe0d6;background:#eaf2ed;padding:5px 11px;border-radius:99px;letter-spacing:0.5px">V2</span>
+  <span style="font-size:22px;font-weight:800;color:#15201a;letter-spacing:-0.4px">What's new</span>
+  <span style="font-size:14px;color:#8a928c">Recurring bills · Safe-to-spend home · Debt payoff · Backup &amp; export · App lock</span>
+</div>
+
+<!-- =================================================== -->
+<!-- V2-1 · RECURRING BILLS & SUBSCRIPTIONS              -->
+<!-- =================================================== -->
+<div style="position:absolute;left:60px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">V2-1 · RECURRING BILLS &nbsp;<span style="color:#1f6f54">NEW · PLAN LANE</span></div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">PLAN · AUTOMATED</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Recurring</div>
+      </div>
+
+      <div style="margin:10px 16px 0;background:#1f6f54;border-radius:22px;padding:18px 20px;flex-shrink:0;box-shadow:0 8px 22px rgba(31,111,84,0.22)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:13px;color:#bfe0cf">Posts automatically every month</div>
+          <div style="font-size:12px;font-weight:700;color:#0f3527;background:#9bd2b8;padding:4px 9px;border-radius:99px">9 active</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:7px">
+          <span style="font-size:15px;font-weight:600;color:#bfe0cf">AED</span>
+          <span style="font-size:36px;font-weight:800;letter-spacing:-1px;color:#fff;font-variant-numeric:tabular-nums">8,420</span>
+          <span style="font-size:14px;color:#bfe0cf;font-weight:600">/ month</span>
+        </div>
+        <div style="font-size:12px;color:#9ec9b3;margin-top:5px">AED 101,040 of your annual plan is already committed</div>
+      </div>
+
+      <div style="padding:16px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">Bills &amp; subscriptions</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#a0a89f;letter-spacing:0.4px">DUE DATE</div>
+      </div>
+
+      <div style="flex:1;overflow:hidden;margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <sc-for list="{{ recurring }}" as="r" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid #f3f3ee">
+            <span style="width:34px;height:34px;border-radius:10px;background:{{ r.tint }};flex-shrink:0"></span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600">{{ r.name }}</div>
+              <div style="font-size:11px;color:#a0a89f;margin-top:1px">{{ r.sub }}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">{{ r.amount }}</div>
+              <div style="font-size:10px;color:#1f6f54;font-weight:600;margin-top:1px">{{ r.due }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:12px 16px 28px;flex-shrink:0">
+        <div style="border:1.5px dashed #c9c9bf;border-radius:16px;padding:15px;text-align:center;font-size:14px;font-weight:600;color:#5f6862">+ Add recurring bill</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- V2-2 · DASHBOARD w/ SAFE TO SPEND  (replaces C1)    -->
+<!-- =================================================== -->
+<div style="position:absolute;left:558px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">V2-2 · DASHBOARD ★ &nbsp;<span style="color:#bd5a3c">REPLACES C1</span></div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 6px;display:flex;justify-content:space-between;align-items:flex-end;flex-shrink:0">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">JUNE · AED</div>
+          <div style="font-size:30px;font-weight:800;letter-spacing:-0.8px;line-height:1.05;margin-top:3px">Hello, Sara</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;background:#dbeae1;color:#1f6f54;font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px">
+          <span style="width:6px;height:6px;border-radius:99px;background:#1f6f54;display:inline-block"></span>On plan
+        </div>
+      </div>
+
+      <!-- SAFE TO SPEND hero -->
+      <div style="margin:8px 16px 0;background:#1f6f54;border-radius:24px;padding:20px;box-shadow:0 8px 22px rgba(31,111,84,0.22)">
+        <div style="font-size:13px;color:#bfe0cf;font-weight:500">Safe to spend today</div>
+        <div style="display:flex;align-items:baseline;gap:7px;margin-top:5px">
+          <span style="font-size:16px;font-weight:600;color:#bfe0cf">AED</span>
+          <span style="font-size:46px;font-weight:800;letter-spacing:-1.4px;color:#fff;font-variant-numeric:tabular-nums">212</span>
+        </div>
+        <div style="height:8px;border-radius:99px;background:rgba(255,255,255,0.18);overflow:hidden;margin-top:14px">
+          <div style="height:100%;width:62%;border-radius:99px;background:#9bd2b8"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:12px;color:#bfe0cf">
+          <span>AED 4,240 left this month</span><span>20 days to go</span>
+        </div>
+      </div>
+
+      <div style="padding:8px 16px 0;display:flex;gap:9px;flex-shrink:0">
+        <div style="flex:1;background:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:11px;color:#8a928c">Income</div>
+          <div style="font-size:17px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums">18,500</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:11px;color:#8a928c">Spent</div>
+          <div style="font-size:17px;font-weight:800;margin-top:2px;color:#bd5a3c;font-variant-numeric:tabular-nums">9,840</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+          <div style="font-size:11px;color:#8a928c">Saved</div>
+          <div style="font-size:17px;font-weight:800;margin-top:2px;color:#1f6f54;font-variant-numeric:tabular-nums">4,420</div>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">Upcoming this week</div>
+        <div style="font-size:12px;color:#1f6f54;font-weight:600">All</div>
+      </div>
+      <div style="flex:1;overflow:hidden;margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <sc-for list="{{ upcoming }}" as="u" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid #f3f3ee">
+            <span style="width:32px;height:32px;border-radius:9px;background:{{ u.tint }};flex-shrink:0"></span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600">{{ u.name }}</div>
+              <div style="font-size:11px;color:#a0a89f;margin-top:1px">{{ u.sub }}</div>
+            </div>
+            <div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:#bd5a3c">{{ u.amount }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex-shrink:0;display:flex;align-items:center;justify-content:space-around;padding:9px 16px 26px;background:rgba(241,241,236,0.92);border-top:1px solid #e6e6df">
+        <div style="font-size:11px;font-weight:700;color:#1f6f54">Home</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Plan</div>
+        <div style="width:46px;height:46px;border-radius:99px;background:#1f6f54;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:400;margin-top:-22px;box-shadow:0 6px 16px rgba(31,111,84,0.35)">+</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Charts</div>
+        <div style="font-size:11px;font-weight:500;color:#a0a89f">Settings</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- V2-3 · DEBT PAYOFF TRACKER                          -->
+<!-- =================================================== -->
+<div style="position:absolute;left:1056px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">V2-3 · DEBT PAYOFF &nbsp;<span style="color:#1f6f54">NEW · GOALS</span></div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 22px 4px;flex-shrink:0">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a928c;letter-spacing:0.5px">GOALS · DEBT</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.6px;margin-top:3px">Debt payoff</div>
+      </div>
+
+      <div style="margin:10px 16px 0;background:#fff;border-radius:22px;padding:18px 20px;flex-shrink:0;box-shadow:0 1px 2px rgba(20,40,30,0.04)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:13px;color:#8a928c">Total remaining</div>
+          <div style="font-size:12px;font-weight:700;color:#1f6f54;background:#eef6f1;padding:4px 9px;border-radius:99px">Debt-free Aug 2027</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px">
+          <span style="font-size:16px;font-weight:600;color:#4a544e">AED</span>
+          <span style="font-size:36px;font-weight:800;letter-spacing:-1px;color:#15201a;font-variant-numeric:tabular-nums">42,300</span>
+        </div>
+        <div style="height:9px;border-radius:99px;background:#ecece6;overflow:hidden;margin-top:14px">
+          <div style="height:100%;width:38%;border-radius:99px;background:#1f6f54"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:#8a928c">
+          <span>38% paid off</span><span>AED 3,150/mo to debts</span>
+        </div>
+      </div>
+
+      <div style="padding:16px 22px 10px;font-size:15px;font-weight:700;flex-shrink:0">Your debts</div>
+      <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ debts }}" as="d" hint-placeholder-count="3">
+          <div style="background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 1px 2px rgba(20,40,30,0.03)">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:34px;height:34px;border-radius:10px;background:{{ d.tint }};flex-shrink:0"></span>
+              <div style="flex:1">
+                <div style="font-size:14px;font-weight:700">{{ d.name }}</div>
+                <div style="font-size:11px;color:#a0a89f;margin-top:1px">{{ d.meta }}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ d.balance }}</div>
+                <div style="font-size:10px;color:#8a928c;margin-top:1px">{{ d.payment }}/mo</div>
+              </div>
+            </div>
+            <div style="height:6px;border-radius:99px;background:#ecece6;overflow:hidden;margin-top:12px">
+              <div style="height:100%;border-radius:99px;background:{{ d.color }};width:{{ d.fill }}%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:#8a928c">
+              <span>{{ d.paidLabel }}</span><span>{{ d.payoff }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:12px 16px 28px;flex-shrink:0">
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;background:#fff;border:1px solid #e2e2d8;text-align:center;padding:14px;border-radius:14px;font-size:13px;font-weight:600;color:#1f6f54">Avalanche</div>
+          <div style="flex:1;background:#1f6f54;color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:13px;font-weight:700">+ Add debt</div>
+        </div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- V2-4 · BACKUP, RESTORE & EXPORT                     -->
+<!-- =================================================== -->
+<div style="position:absolute;left:1554px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">V2-4 · BACKUP &amp; EXPORT &nbsp;<span style="color:#1f6f54">NEW · SETTINGS</span></div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#f1f1ec;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#15201a">
+      <div style="padding:6px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="width:34px;height:34px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;color:#4a544e;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.05)">‹</div>
+        <div style="font-size:17px;font-weight:700">Backup &amp; data</div>
+        <div style="width:34px;height:34px"></div>
+      </div>
+
+      <div style="margin:8px 16px 0;background:#eaf2ed;border:1px solid #cfe0d6;border-radius:20px;padding:18px;flex-shrink:0;display:flex;align-items:center;gap:14px">
+        <div style="width:44px;height:44px;border-radius:13px;background:#1f6f54;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 14px rgba(31,111,84,0.3)">
+          <span style="width:16px;height:16px;border:3px solid #fff;border-radius:99px;border-right-color:transparent;transform:rotate(-45deg);display:inline-block"></span>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;color:#15201a">Backed up today</div>
+          <div style="font-size:12px;color:#5f6862;margin-top:2px">09:14 · stored on this device</div>
+        </div>
+      </div>
+
+      <div style="padding:18px 22px 8px;font-size:13px;font-weight:700;color:#8a928c;letter-spacing:0.3px;flex-shrink:0">EXPORT</div>
+      <div style="margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04);flex-shrink:0">
+        <sc-for list="{{ exports }}" as="e" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f3f3ee">
+            <span style="width:30px;height:30px;border-radius:8px;background:{{ e.tint }};flex-shrink:0"></span>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:600">{{ e.name }}</div>
+              <div style="font-size:11px;color:#a0a89f;margin-top:1px">{{ e.sub }}</div>
+            </div>
+            <div style="color:#cdd2cb;font-size:15px">›</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="padding:18px 22px 8px;font-size:13px;font-weight:700;color:#8a928c;letter-spacing:0.3px;flex-shrink:0">BACKUP</div>
+      <div style="margin:0 16px;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(20,40,30,0.04);flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f3f3ee">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">Auto-backup</div>
+            <div style="font-size:11px;color:#a0a89f;margin-top:1px">Daily · to Files / iCloud Drive</div>
+          </div>
+          <div style="width:46px;height:28px;border-radius:99px;background:#1f6f54;position:relative;flex-shrink:0">
+            <span style="position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #f3f3ee">
+          <div style="flex:1;font-size:14px;font-weight:600">Create backup now</div>
+          <div style="color:#cdd2cb;font-size:15px">›</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+          <div style="flex:1;font-size:14px;font-weight:600;color:#1f6f54">Restore from file</div>
+          <div style="color:#cdd2cb;font-size:15px">›</div>
+        </div>
+      </div>
+
+      <div style="flex:1"></div>
+      <div style="padding:14px 22px 30px;text-align:center;flex-shrink:0">
+        <div style="display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#1f6f54;letter-spacing:0.4px">
+          <span style="width:6px;height:6px;border-radius:99px;background:#1f6f54"></span>ALL DATA STAYS ON YOUR DEVICE
+        </div>
+      </div>
+    </div>
+  </x-import>
+</div>
+
+<!-- =================================================== -->
+<!-- V2-5 · APP LOCK (FACE ID)                           -->
+<!-- =================================================== -->
+<div style="position:absolute;left:2052px;top:248px;width:402px">
+  <div data-drags-parent="1" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5b635d;margin-bottom:14px;letter-spacing:0.4px">V2-5 · APP LOCK &nbsp;<span style="color:#1f6f54">NEW · SECURITY</span></div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+    <div style="height:100%;display:flex;flex-direction:column;background:#11271f;padding-top:54px;font-family:'Hanken Grotesk',system-ui;color:#eef3ef">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 34px;text-align:center">
+        <div style="width:72px;height:72px;border-radius:22px;background:#1f6f54;display:flex;align-items:flex-end;justify-content:center;gap:5px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.4)">
+          <span style="width:8px;height:20px;border-radius:3px;background:#9bd2b8"></span>
+          <span style="width:8px;height:34px;border-radius:3px;background:#c8e6d8"></span>
+          <span style="width:8px;height:28px;border-radius:3px;background:#fff"></span>
+        </div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.4px;margin-top:26px">Planner is locked</div>
+        <div style="font-size:14px;color:#a7c6b5;margin-top:8px;line-height:1.5;max-width:260px">Your finances stay private. Unlock with Face ID to continue.</div>
+
+        <div style="width:84px;height:84px;border-radius:24px;border:2px solid rgba(155,210,184,0.5);display:flex;align-items:center;justify-content:center;margin-top:40px">
+          <div style="width:42px;height:42px;border:2.5px solid #9bd2b8;border-radius:11px;position:relative">
+            <span style="position:absolute;top:9px;left:8px;width:4px;height:9px;border-radius:2px;background:#9bd2b8"></span>
+            <span style="position:absolute;top:9px;right:8px;width:4px;height:9px;border-radius:2px;background:#9bd2b8"></span>
+            <span style="position:absolute;bottom:9px;left:9px;right:9px;height:4px;border-radius:2px;border-bottom:2.5px solid #9bd2b8;border-left:2.5px solid #9bd2b8;border-right:2.5px solid #9bd2b8;border-bottom-left-radius:4px;border-bottom-right-radius:4px"></span>
+          </div>
+        </div>
+        <div style="font-size:14px;color:#9bd2b8;font-weight:600;margin-top:18px">Tap to unlock with Face ID</div>
+      </div>
+
+      <div style="padding:0 24px 36px;flex-shrink:0;text-align:center">
+        <div style="font-size:15px;font-weight:600;color:#a7c6b5;padding:14px">Use passcode instead</div>
+      </div>
+    </div>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const recurring = [
+      { name: 'Rent', sub: 'Housing · monthly', amount: '5,000', due: '1st', tint: '#dbeae1' },
+      { name: 'School fees', sub: 'Family · monthly', amount: '1,200', due: '5th', tint: '#e6ead7' },
+      { name: 'Car insurance', sub: 'Transport · monthly', amount: '450', due: '8th', tint: '#dde6ea' },
+      { name: 'DEWA', sub: 'Utilities · monthly', amount: '620', due: '15th', tint: '#e1e6e2' },
+      { name: 'Etisalat', sub: 'Utilities · monthly', amount: '389', due: '5th', tint: '#e1e6e2' },
+      { name: 'Gym', sub: 'Health · monthly', amount: '250', due: '10th', tint: '#efe0e6' },
+      { name: 'Netflix', sub: 'Subscriptions · monthly', amount: '56', due: '12th', tint: '#ece1d2' },
+      { name: 'Spotify', sub: 'Subscriptions · monthly', amount: '21', due: '18th', tint: '#ece1d2' },
+      { name: 'iCloud', sub: 'Subscriptions · monthly', amount: '12', due: '22nd', tint: '#ece1d2' },
+    ];
+
+    const upcoming = [
+      { name: 'DEWA', sub: 'Utilities · in 2 days', amount: '−620', tint: '#e1e6e2' },
+      { name: 'Netflix', sub: 'Subscriptions · in 4 days', amount: '−56', tint: '#ece1d2' },
+      { name: 'Gym', sub: 'Health · in 5 days', amount: '−250', tint: '#efe0e6' },
+    ];
+
+    const debts = [
+      { name: 'Car loan', meta: '4.2% APR · 18 mo left', balance: '28,400', payment: '1,650', fill: 53, color: '#1f6f54', paidLabel: '53% paid', payoff: 'Done Dec 2027', tint: '#dde6ea' },
+      { name: 'Credit card', meta: '21% APR · highest rate', balance: '9,900', payment: '1,200', fill: 34, color: '#bd5a3c', paidLabel: '34% paid', payoff: 'Done Mar 2027', tint: '#f7e8e1' },
+      { name: 'Phone plan', meta: '0% · interest-free', balance: '4,000', payment: '300', fill: 60, color: '#7a8b3f', paidLabel: '60% paid', payoff: 'Done Aug 2026', tint: '#e6ead7' },
+    ];
+
+    const exports = [
+      { name: 'Export transactions (CSV)', sub: 'All 2026 income & expenses', tint: '#e6ead7' },
+      { name: 'Year report (PDF)', sub: 'Summary, charts & categories', tint: '#dde6ea' },
+      { name: 'Share backup file', sub: 'Full data · .planner', tint: '#dbeae1' },
+    ];
+
+    return { recurring, upcoming, debts, exports };
+  }
+}
+</script>
+</body>
+</html>

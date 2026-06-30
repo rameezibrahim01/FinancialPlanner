@@ -8,6 +8,7 @@ struct MonthPlanEditorView: View {
     @Bindable var plan: MonthPlan
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var editingIncome = false
     @State private var incomeText = ""
 
@@ -20,28 +21,35 @@ struct MonthPlanEditorView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Theme.Spacing.section) {
-                summaryCard
-                categoriesHeader
-                VStack(spacing: 18) {
-                    ForEach(plan.orderedBudgets, id: \.persistentModelID) { budget in
-                        CategoryBudgetRow(budget: budget, scale: sliderScale) {
-                            try? context.save()
-                        }
+            if sizeClass == .regular {
+                // iPad: summary + actions on the left, category sliders on the right.
+                HStack(alignment: .top, spacing: Theme.Spacing.section) {
+                    VStack(spacing: Theme.Spacing.section) {
+                        summaryCard
+                        planVsActualLink
                     }
+                    .frame(maxWidth: 340, alignment: .top)
+                    VStack(alignment: .leading, spacing: Theme.Spacing.section) {
+                        categoriesHeader
+                        categoryList
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
-                NavigationLink {
-                    PlanVsActualView(plan: plan)
-                } label: {
-                    Text("View plan vs actual")
-                        .font(.ui(14, .semibold))
-                        .foregroundStyle(Theme.Palette.green)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
+                .padding(.horizontal, Theme.Spacing.side)
+                .padding(.bottom, Theme.Spacing.bottomSafe)
+                .readableContent(960)
+            } else {
+                // iPhone: single stacked column.
+                VStack(alignment: .leading, spacing: Theme.Spacing.section) {
+                    summaryCard
+                    categoriesHeader
+                    categoryList
+                    planVsActualLink
                 }
+                .padding(.horizontal, Theme.Spacing.side)
+                .padding(.bottom, Theme.Spacing.bottomSafe)
+                .readableContent()
             }
-            .padding(.horizontal, Theme.Spacing.side)
-            .padding(.bottom, Theme.Spacing.bottomSafe)
         }
         .screenBackground()
         .navigationTitle(Text(verbatim: "\(plan.monthLong) \(plan.year) plan"))
@@ -114,6 +122,28 @@ struct MonthPlanEditorView: View {
                 .foregroundStyle(Theme.Palette.muted)
                 .padding(.top, 8)
             }
+        }
+    }
+
+    private var categoryList: some View {
+        VStack(spacing: 18) {
+            ForEach(plan.orderedBudgets, id: \.persistentModelID) { budget in
+                CategoryBudgetRow(budget: budget, scale: sliderScale) {
+                    try? context.save()
+                }
+            }
+        }
+    }
+
+    private var planVsActualLink: some View {
+        NavigationLink {
+            PlanVsActualView(plan: plan)
+        } label: {
+            Text("View plan vs actual")
+                .font(.ui(14, .semibold))
+                .foregroundStyle(Theme.Palette.green)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
         }
     }
 

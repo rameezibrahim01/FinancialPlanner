@@ -16,3 +16,18 @@ xcuserdata/
 # CocoaPods / Carthage (not used, but ignore if added)
 Pods/
 Carthage/Build/
+
+# Fastlane output / generated docs
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
+*.ipa
+*.dSYM.zip
+
+# Signing material / secrets — NEVER commit these
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+.env

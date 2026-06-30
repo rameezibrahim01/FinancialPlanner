@@ -6,18 +6,36 @@ All data is on-device; no backend, no account. Currency AED, year 2026.
 
 ## Status
 
-**Lane 2 — Plan the year** is implemented end-to-end:
+All four lanes — **Set up**, **Plan the year**, **Track**, and **Review** — are
+implemented end-to-end:
 
 | Screen | View | Notes |
 |---|---|---|
+| A1 · Welcome | `WelcomeView` | first-launch hero, "Get started" / "I already have a backup" |
+| A2 · Income setup | `IncomeSetupView` | income source cards, add-source sheet, projected annual income |
 | B1 · Year Plan | `YearPlanView` | 12-month table, green summary card, "Copy to all months" |
 | B2 · Month Plan editor ★ | `MonthPlanEditorView` | live planned-savings + allocation meter, draggable category sliders, over-allocation warning |
 | B3 · Plan vs Actual | `PlanVsActualView` | per-category actual/plan bars from transactions, ON TRACK/OVER status |
 | B4 · Savings goals | `SavingsGoalsView` | progress ring, pace note, goal list |
+| C1 · Dashboard (home) | `DashboardView` | net-saved card, 12-month at-a-glance grid, custom bottom tab bar |
+| C2 · Monthly breakdown | `MonthlyBreakdownView` | net + income/spent split bar, "where it went" category bars, recent transactions |
+| C3 · Add transaction | `AddTransactionView` | Expense/Income segmented control, amount display, category chips, numeric keypad |
+| D1 · Charts & trends | `ChartsView` | avg/best/worst stat cards, net-by-month bar chart, top-categories breakdown |
+| D2 · Year in review & settings | `SettingsView` | 2×2 stat grid, data/settings list, JSON backup export via share sheet |
 
-Lanes 1 (Set up), 3 (Track) and 4 (Review) are not built yet. The app currently
-launches into the Year Plan; B2 is reached by tapping a month, B3 from inside B2,
-and B4 from the "Goals" toolbar button.
+On first launch the app shows the **setup flow** (A1 → A2); finishing (or
+skipping via "I already have a backup") sets a persisted `hasCompletedOnboarding`
+flag and never shows it again. After that the app opens on the **Dashboard**
+(Year tab). The bottom tab bar hosts Year (Dashboard), Plan (Year Plan → B2 →
+B3), a center **+** that presents Add Transaction (C3), Charts (D1), and Settings
+(D2). Tapping a month on the Dashboard opens its breakdown (C2). B4 is reached
+from the "Goals" toolbar button inside the Plan tab.
+
+The store seeds a full year of actual transactions (salary income +
+per-category expenses; October is intentionally over budget) so the Track and
+Review screens have data to display, while keeping June's exact plan-vs-actual
+figures. The "Export backup file" action serializes all plans, transactions, and
+goals to a JSON file and presents the system share sheet (fully offline).
 
 ## Project layout
 
@@ -52,6 +70,61 @@ xcodebuild -project FinancialPlanner.xcodeproj -scheme FinancialPlanner \
 
 > Regenerate the project with `xcodegen generate` whenever you add or remove
 > source files. Min deployment target: iOS 17 (required by SwiftData).
+
+## V2 additions
+
+Built on top of v1 (same tokens, components, AED, calm-green system). See
+`design_handoff_financial_planner/V2_SCOPE.md`.
+
+| Feature | View(s) | Entry point |
+|---|---|---|
+| V2-1 · Recurring bills & subscriptions | `RecurringView` | Plan tab → "Recurring" |
+| V2-2 · Safe-to-spend dashboard *(replaces C1)* | `DashboardView` | Home tab (Today/Year toggle) |
+| V2-3 · Debt payoff tracker | `DebtPayoffView` | Goals → "Debt payoff" |
+| V2-4 · Backup, restore & export | `BackupView` + `Backup` | Settings → "Backup & data" |
+| V2-5 · App lock (Face ID / passcode) | `LockScreenView` | Settings → "App Lock" |
+
+- **Recurring** (`Recurring` model) defines predictable spend once; annual/quarterly
+  amounts amortize into a monthly equivalent. It drives the dashboard's committed
+  total and Upcoming list. *(Interpretation: recurring informs the Safe-to-spend math
+  and Upcoming rather than physically inserting rows into each `MonthPlan`, to avoid
+  double-counting v1 budgets.)*
+- **Safe to spend today** = `(monthBudget − committed recurring remaining − spent) /
+  days left`, floored at 0 (amber when over). The home tab keeps the v1 12-month grid
+  under a Today/Year toggle; the tab label "Year" became "Home".
+- **Debt payoff** (`Debt` model) simulates month-by-month payoff (accrue interest, pay
+  minimums, roll freed payments into the highest-priority debt) for **Avalanche**
+  (highest APR) vs **Snowball** (smallest balance), yielding per-debt and overall
+  debt-free dates.
+- **Backup** serializes all state (plans, transactions, goals, recurring, debts) to a
+  `.planner` JSON file; exports transactions as CSV and a year report as PDF; and
+  restores from a chosen file (replaces all state, with a confirm). All offline.
+- **App Lock** gates the app on launch / return-from-background (after an
+  Immediately/1-min/5-min timeout) using `LAContext`. *(Deviation: uses device
+  biometrics + the device passcode as fallback rather than a custom app passcode
+  hashed in the Keychain — simpler and standard; can be swapped for a Keychain
+  passcode if required.)*
+
+## Platforms
+
+Universal (iPhone + iPad), portrait on iPhone and all orientations on iPad.
+The navigation shell adapts to the horizontal size class:
+
+- **iPhone (compact):** a custom bottom bar (Year / Plan / Charts / Settings)
+  with the raised green **+** Add button integrated into the bar's center. The
+  bar is applied via `safeAreaInset` inside the `NavigationStack` so it reserves
+  scroll space correctly; pushed detail screens hide it and use a back button.
+- **iPad (regular):** a `NavigationSplitView` **sidebar** for the four sections
+  with an "New transaction" action button; section content fills the detail
+  pane. iPad Split View / Slide Over fall back to the compact tab bar.
+
+Per-screen, two adaptive helpers (in `DesignSystem/Components.swift`) keep the
+iPad layout from stretching: `readableContent(_:)` caps and centers content
+width, and `navBarHiddenInCompact()` hides the bar on iPhone while keeping the
+sidebar toggle on iPad. The Dashboard's month grid widens from 3 to 6 columns in
+regular width, and the B2 month-plan editor splits into two columns on iPad
+(planned-income/savings summary on the left, category-budget sliders on the
+right) while staying a single stacked column on iPhone.
 
 ## Notes / deviations
 

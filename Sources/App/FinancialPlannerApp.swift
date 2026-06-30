@@ -9,7 +9,8 @@ struct FinancialPlannerApp: App {
         do {
             container = try ModelContainer(
                 for: Category.self, IncomeSource.self, CategoryBudget.self,
-                MonthPlan.self, Transaction.self, Goal.self
+                MonthPlan.self, Transaction.self, Goal.self,
+                Recurring.self, Debt.self
             )
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
@@ -19,18 +20,13 @@ struct FinancialPlannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            AppEntryView()
+                // The design is a fixed light palette (the one dark surface, the
+                // lock screen, is hardcoded). Pin the app to light so system
+                // controls don't flip in dark mode. Also set via Info.plist's
+                // UIUserInterfaceStyle for UIKit-presented surfaces.
+                .preferredColorScheme(.light)
         }
         .modelContainer(container)
-    }
-}
-
-/// Roots the app at the Plan-the-year flow (the lane implemented first).
-struct RootView: View {
-    var body: some View {
-        NavigationStack {
-            YearPlanView()
-        }
-        .tint(Theme.Palette.green)
     }
 }
