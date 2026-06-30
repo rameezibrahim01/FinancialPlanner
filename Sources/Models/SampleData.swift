@@ -104,6 +104,12 @@ enum SampleData {
         let existing = (try? context.fetch(FetchDescriptor<MonthPlan>())) ?? []
         guard existing.isEmpty else { return }
 
+        // Seed a starting savings balance (the user's existing savings) so the
+        // dashboard's "Total savings" reflects real wealth, not just this year.
+        if UserDefaults.standard.object(forKey: "startingSavings") == nil {
+            UserDefaults.standard.set(40000, forKey: "startingSavings")
+        }
+
         // Categories
         for (i, (name, hex)) in categories.enumerated() {
             context.insert(Category(name: name, colorHex: hex, order: i))

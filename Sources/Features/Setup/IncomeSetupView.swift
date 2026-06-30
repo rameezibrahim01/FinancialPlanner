@@ -8,6 +8,7 @@ struct IncomeSetupView: View {
 
     @Environment(\.modelContext) private var context
     @Query(sort: \IncomeSource.amount, order: .reverse) private var sources: [IncomeSource]
+    @AppStorage("startingSavings") private var startingSavings = 0.0
     @State private var showAdd = false
 
     private var projectedAnnual: Double { sources.reduce(0) { $0 + $1.amount } * 12 }
@@ -23,6 +24,7 @@ struct IncomeSetupView: View {
                         }
                         DashedAddTile(title: "+ Add income source") { showAdd = true }
                     }
+                    savingsField
                     summaryBar
                 }
                 .padding(.horizontal, Theme.Spacing.side)
@@ -57,6 +59,28 @@ struct IncomeSetupView: View {
                 .font(.ui(14)).foregroundStyle(Theme.Palette.inkSecondary)
         }
         .padding(.horizontal, 4)
+    }
+
+    // MARK: Current savings
+
+    private var savingsField: some View {
+        Card(padding: 16, radius: Theme.Radius.card) {
+            HStack {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Current savings").font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+                    Text("What you've already put aside").font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+                }
+                Spacer()
+                HStack(spacing: 4) {
+                    Text("AED").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
+                    TextField("0", value: $startingSavings, format: .number)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .font(.ui(16, .bold))
+                        .frame(maxWidth: 110)
+                }
+            }
+        }
     }
 
     // MARK: Projected-income summary bar

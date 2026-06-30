@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var rollOverOn = true
     @AppStorage("appLock") private var appLock = false
     @AppStorage("lockTimeout") private var lockTimeout = 0   // minutes; 0 = immediately
+    @AppStorage("startingSavings") private var startingSavings = 0.0
 
     // MARK: Derived
 
@@ -122,6 +123,8 @@ struct SettingsView: View {
                 .padding(.horizontal, 4)
             Card(padding: 4, radius: Theme.Radius.card) {
                 VStack(spacing: 0) {
+                    startingSavingsRow
+                    divider
                     valueRow("Currency", "AED", tint: Theme.Palette.greenSoft, icon: "coloncurrencysign.circle")
                     divider
                     toggleRow("Monthly reminders", isOn: $remindersOn, tint: Theme.Palette.greenSoft2, icon: "bell")
@@ -179,6 +182,21 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var startingSavingsRow: some View {
+        HStack(spacing: 12) {
+            rowIcon(Theme.Palette.greenSoft, "banknote")
+            Text("Starting savings").font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+            Spacer()
+            Text("AED").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
+            TextField("0", value: $startingSavings, format: .number)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .font(.ui(14, .semibold))
+                .frame(maxWidth: 110)
+        }
+        .padding(.vertical, 10).padding(.horizontal, 10)
     }
 
     private var divider: some View {

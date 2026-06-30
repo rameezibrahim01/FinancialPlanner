@@ -7,6 +7,7 @@ import SwiftData
 struct DashboardView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @AppStorage("displayName") private var displayName = "Sara"
+    @AppStorage("startingSavings") private var startingSavings = 0.0
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Recurring.order) private var recurring: [Recurring]
@@ -89,6 +90,13 @@ struct DashboardView: View {
     private var yearExpense: Double { byMonth.values.reduce(0) { $0 + $1.expense } }
     private var yearNet: Double { yearIncome - yearExpense }
     private var savingsRate: Int { yearIncome > 0 ? Int((yearNet / yearIncome * 100).rounded()) : 0 }
+
+    /// Net saved across all recorded transactions (not just the current year).
+    private var allTimeNet: Double {
+        txns.reduce(0) { $0 + ($1.type == .income ? $1.amount : -$1.amount) }
+    }
+    /// What the user actually has: the savings they started with + all-time net.
+    private var totalSavings: Double { startingSavings + allTimeNet }
 
     private var columns: [GridItem] {
         Array(repeating: GridItem(.flexible(), spacing: 10), count: sizeClass == .regular ? 6 : 3)
@@ -245,23 +253,34 @@ struct DashboardView: View {
 
     private var yearNetCard: some View {
         Card(padding: 20, radius: Theme.Radius.largeSummary) {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Net saved this year")
+                    Text("Total savings")
                         .font(.ui(14)).foregroundStyle(Theme.Palette.inkSecondary)
                     Spacer()
                     Pill(text: "\(savingsRate)% rate", bg: Theme.Palette.greenSoft3)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text("AED").font(.ui(16, .semibold)).foregroundStyle(Theme.Palette.inkSecondary)
-                    Text(Money.plain(yearNet)).tabular()
+                    Text(Money.plain(totalSavings)).tabular()
                         .font(.ui(38, .heavy)).kerning(-1)
-                        .foregroundStyle(yearNet >= 0 ? Theme.Palette.green : Theme.Palette.clay)
+                        .foregroundStyle(totalSavings >= 0 ? Theme.Palette.green : Theme.Palette.clay)
+                }
+                if startingSavings > 0 {
+                    Text("Starting \(Money.plain(startingSavings)) + \(Money.plain(allTimeNet)) saved")
+                        .font(.ui(12)).foregroundStyle(Theme.Palette.muted)
                 }
                 Rectangle().fill(Theme.Palette.hairline).frame(height: 1)
                 HStack(spacing: 0) {
                     legendCell("Income", yearIncome, dot: Theme.Palette.green)
                     legendCell("Expenses", yearExpense, dot: Theme.Palette.clay)
+                }
+                HStack {
+                    Text("Net saved this year").font(.ui(12)).foregroundStyle(Theme.Palette.muted)
+                    Spacer()
+                    Text(Money.aed(yearNet)).tabular()
+                        .font(.ui(13, .bold))
+                        .foregroundStyle(yearNet >= 0 ? Theme.Palette.green : Theme.Palette.clay)
                 }
             }
         }

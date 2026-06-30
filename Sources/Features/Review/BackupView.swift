@@ -16,6 +16,7 @@ struct BackupView: View {
 
     @AppStorage("autoBackup") private var autoBackup = true
     @AppStorage("lastBackupAt") private var lastBackupAt: Double = 0
+    @AppStorage("startingSavings") private var startingSavings = 0.0
 
     @State private var shareItem: ShareItem?
     @State private var showImporter = false
@@ -176,14 +177,16 @@ struct BackupView: View {
     private func shareBackup() {
         do {
             let url = try Backup.writePlanner(plans: plans, txns: txns, goals: goals,
-                                              recurring: recurring, debts: debts, year: year)
+                                              recurring: recurring, debts: debts,
+                                              startingSavings: startingSavings, year: year)
             shareItem = ShareItem(url: url)
         } catch { errorMessage = error.localizedDescription }
     }
     private func createBackupNow() {
         do {
             let url = try Backup.writePlanner(plans: plans, txns: txns, goals: goals,
-                                              recurring: recurring, debts: debts, year: year)
+                                              recurring: recurring, debts: debts,
+                                              startingSavings: startingSavings, year: year)
             lastBackupAt = Date().timeIntervalSince1970
             shareItem = ShareItem(url: url)
         } catch { errorMessage = error.localizedDescription }

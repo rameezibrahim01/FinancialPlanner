@@ -18,6 +18,7 @@ enum Backup {
         struct DebtSnap: Codable { var name: String; var balance: Double; var openingBalance: Double; var apr: Double; var monthlyPayment: Double; var colorHex: String; var tintHex: String; var order: Int }
 
         var exportedYear: Int
+        var startingSavings: Double?
         var transactions: [Tx]
         var plans: [Plan]
         var goals: [GoalSnap]
@@ -26,9 +27,11 @@ enum Backup {
     }
 
     static func makeSnapshot(plans: [MonthPlan], txns: [Transaction], goals: [Goal],
-                             recurring: [Recurring], debts: [Debt], year: Int) -> Snapshot {
+                             recurring: [Recurring], debts: [Debt],
+                             startingSavings: Double, year: Int) -> Snapshot {
         Snapshot(
             exportedYear: year,
+            startingSavings: startingSavings,
             transactions: txns.map {
                 .init(type: $0.type.rawValue, amount: $0.amount, category: $0.categoryName,
                       date: $0.date, note: $0.note)
@@ -65,8 +68,10 @@ enum Backup {
 
     @discardableResult
     static func writePlanner(plans: [MonthPlan], txns: [Transaction], goals: [Goal],
-                             recurring: [Recurring], debts: [Debt], year: Int) throws -> URL {
-        let snap = makeSnapshot(plans: plans, txns: txns, goals: goals, recurring: recurring, debts: debts, year: year)
+                             recurring: [Recurring], debts: [Debt],
+                             startingSavings: Double, year: Int) throws -> URL {
+        let snap = makeSnapshot(plans: plans, txns: txns, goals: goals, recurring: recurring,
+                                debts: debts, startingSavings: startingSavings, year: year)
         let data = try encoder().encode(snap)
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("FinancialPlanner-\(year).planner")
@@ -138,6 +143,10 @@ enum Backup {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         let snap = try decoder.decode(Snapshot.self, from: data)
+
+        if let s = snap.startingSavings {
+            UserDefaults.standard.set(s, forKey: "startingSavings")
+        }
 
         try deleteAll(MonthPlan.self, context)        // cascades CategoryBudget
         try deleteAll(CategoryBudget.self, context)
