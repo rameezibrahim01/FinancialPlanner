@@ -13,6 +13,8 @@ struct SettingsView: View {
 
     @State private var remindersOn = true
     @State private var rollOverOn = true
+    @AppStorage("appLock") private var appLock = false
+    @AppStorage("lockTimeout") private var lockTimeout = 0   // minutes; 0 = immediately
 
     // MARK: Derived
 
@@ -50,6 +52,7 @@ struct SettingsView: View {
                 header
                 statGrid
                 settingsList
+                securitySection
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
@@ -133,6 +136,46 @@ struct SettingsView: View {
                     valueRow("Categories", "\(categories.count)", tint: Theme.Palette.claySoft, icon: "square.grid.2x2")
                     divider
                     toggleRow("Roll over balance", isOn: $rollOverOn, tint: Theme.Palette.greenSoft, icon: "arrow.triangle.2.circlepath")
+                }
+            }
+        }
+    }
+
+    // MARK: Security (V2-5)
+
+    private var timeoutLabel: String {
+        lockTimeout == 0 ? "Immediately" : "After \(lockTimeout) min"
+    }
+
+    private var securitySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Security").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                .padding(.horizontal, 4)
+            Card(padding: 4, radius: Theme.Radius.card) {
+                VStack(spacing: 0) {
+                    toggleRow("App Lock (Face ID)", isOn: $appLock,
+                              tint: Theme.Palette.greenSoft, icon: "faceid")
+                    if appLock {
+                        divider
+                        HStack(spacing: 12) {
+                            rowIcon(Theme.Palette.greenSoft2, "lock.rotation")
+                            Text("Auto-lock").font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+                            Spacer()
+                            Menu {
+                                Button("Immediately") { lockTimeout = 0 }
+                                Button("After 1 minute") { lockTimeout = 1 }
+                                Button("After 5 minutes") { lockTimeout = 5 }
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Text(timeoutLabel).font(.ui(14)).foregroundStyle(Theme.Palette.muted)
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(Theme.Palette.faint)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 10).padding(.horizontal, 10)
+                    }
                 }
             }
         }

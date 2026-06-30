@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 import UniformTypeIdentifiers
 
 /// V2-4 · Backup, restore & export — first-class control over on-device data:

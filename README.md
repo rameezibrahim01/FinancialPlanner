@@ -71,6 +71,40 @@ xcodebuild -project FinancialPlanner.xcodeproj -scheme FinancialPlanner \
 > Regenerate the project with `xcodegen generate` whenever you add or remove
 > source files. Min deployment target: iOS 17 (required by SwiftData).
 
+## V2 additions
+
+Built on top of v1 (same tokens, components, AED, calm-green system). See
+`design_handoff_financial_planner/V2_SCOPE.md`.
+
+| Feature | View(s) | Entry point |
+|---|---|---|
+| V2-1 · Recurring bills & subscriptions | `RecurringView` | Plan tab → "Recurring" |
+| V2-2 · Safe-to-spend dashboard *(replaces C1)* | `DashboardView` | Home tab (Today/Year toggle) |
+| V2-3 · Debt payoff tracker | `DebtPayoffView` | Goals → "Debt payoff" |
+| V2-4 · Backup, restore & export | `BackupView` + `Backup` | Settings → "Backup & data" |
+| V2-5 · App lock (Face ID / passcode) | `LockScreenView` | Settings → "App Lock" |
+
+- **Recurring** (`Recurring` model) defines predictable spend once; annual/quarterly
+  amounts amortize into a monthly equivalent. It drives the dashboard's committed
+  total and Upcoming list. *(Interpretation: recurring informs the Safe-to-spend math
+  and Upcoming rather than physically inserting rows into each `MonthPlan`, to avoid
+  double-counting v1 budgets.)*
+- **Safe to spend today** = `(monthBudget − committed recurring remaining − spent) /
+  days left`, floored at 0 (amber when over). The home tab keeps the v1 12-month grid
+  under a Today/Year toggle; the tab label "Year" became "Home".
+- **Debt payoff** (`Debt` model) simulates month-by-month payoff (accrue interest, pay
+  minimums, roll freed payments into the highest-priority debt) for **Avalanche**
+  (highest APR) vs **Snowball** (smallest balance), yielding per-debt and overall
+  debt-free dates.
+- **Backup** serializes all state (plans, transactions, goals, recurring, debts) to a
+  `.planner` JSON file; exports transactions as CSV and a year report as PDF; and
+  restores from a chosen file (replaces all state, with a confirm). All offline.
+- **App Lock** gates the app on launch / return-from-background (after an
+  Immediately/1-min/5-min timeout) using `LAContext`. *(Deviation: uses device
+  biometrics + the device passcode as fallback rather than a custom app passcode
+  hashed in the Keychain — simpler and standard; can be swapped for a Keychain
+  passcode if required.)*
+
 ## Platforms
 
 Universal (iPhone + iPad), portrait on iPhone and all orientations on iPad.

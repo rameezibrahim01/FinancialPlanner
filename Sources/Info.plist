@@ -25,6 +25,8 @@
 		<key>UIColorName</key>
 		<string></string>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Planner uses Face ID to unlock your financial data on this device.</string>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDarkContent</string>
 	<key>UISupportedInterfaceOrientations</key>
