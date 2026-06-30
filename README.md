@@ -76,8 +76,9 @@ xcodebuild -project FinancialPlanner.xcodeproj -scheme FinancialPlanner \
 Universal (iPhone + iPad), portrait on iPhone and all orientations on iPad.
 The navigation shell adapts to the horizontal size class:
 
-- **iPhone (compact):** the custom bottom tab bar (Year / Plan / + / Charts /
-  Settings) with the raised center Add button.
+- **iPhone (compact):** the system `TabView` (Year / Plan / Charts / Settings),
+  styled to the design via `UITabBarAppearance`, with a raised green **+** Add
+  button overlaid above the bar's center.
 - **iPad (regular):** a `NavigationSplitView` **sidebar** for the four sections
   with an "New transaction" action button; section content fills the detail
   pane. iPad Split View / Slide Over fall back to the compact tab bar.
