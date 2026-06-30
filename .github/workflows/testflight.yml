@@ -33,23 +33,40 @@ jobs:
   build:
     runs-on: macos-15
     steps:
+      # Skip cleanly (green) until the Apple/TestFlight secrets are configured,
+      # so merges to main don't fail red before the account is wired up.
+      - name: Check if TestFlight is configured
+        id: guard
+        run: |
+          if [ -z "${{ secrets.ASC_KEY_ID }}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::TestFlight secrets not set yet — skipping build & upload."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.guard.outputs.ready == 'true'
 
       - name: Select Xcode
+        if: steps.guard.outputs.ready == 'true'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
       - name: Install XcodeGen
+        if: steps.guard.outputs.ready == 'true'
         run: brew install xcodegen
 
       - name: Set up Ruby + cache gems
+        if: steps.guard.outputs.ready == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
           bundler-cache: true
 
       - name: Run fastlane
+        if: steps.guard.outputs.ready == 'true'
         run: bundle exec fastlane ${{ github.event.inputs.lane || 'beta' }}
         env:
           APP_IDENTIFIER: com.presight.financialplanner
