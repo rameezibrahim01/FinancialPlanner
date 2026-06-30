@@ -29,6 +29,8 @@
 	<string>Planner uses Face ID to unlock your financial data on this device.</string>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDarkContent</string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -35,6 +35,7 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSFaceIDUsageDescription: Planner uses Face ID to unlock your financial data on this device.
+        UIUserInterfaceStyle: Light
         UIStatusBarStyle: UIStatusBarStyleDarkContent
     settings:
       base:
