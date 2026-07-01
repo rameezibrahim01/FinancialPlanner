@@ -155,11 +155,15 @@ enum SampleData {
             UserDefaults.standard.set(40000, forKey: "startingSavings")
         }
 
-        // Income sources
+        // Income sources. lastPostedPeriod is set past year-end so the demo's
+        // already-seeded transactions aren't double-posted by AutoPost.
+        let sealed = year * 100 + 12
         context.insert(IncomeSource(name: "Salary", cadence: "Monthly · 1st",
-                                    amount: 18500, recurring: true, tintHex: "#dbeae1"))
+                                    amount: 18500, recurring: true, tintHex: "#dbeae1",
+                                    lastPostedPeriod: sealed))
         context.insert(IncomeSource(name: "Freelance", cadence: "Avg / month",
-                                    amount: 1200, recurring: true, tintHex: "#e6ead7"))
+                                    amount: 1200, recurring: true, tintHex: "#e6ead7",
+                                    lastPostedPeriod: sealed))
 
         // Actual transactions for the whole year — the source of truth for the
         // Track/Review lanes. Each month gets a salary income plus per-category
@@ -202,7 +206,7 @@ enum SampleData {
         for (i, r) in recurring.enumerated() {
             context.insert(Recurring(name: r.0, amount: r.1, categoryName: r.2, colorHex: r.3,
                                      tintHex: r.4, cadence: .monthly, dueDay: r.5,
-                                     autoPost: true, order: i))
+                                     autoPost: true, order: i, lastPostedPeriod: sealed))
         }
 
         // Debts (V2-3) — matches the V2 design figures.

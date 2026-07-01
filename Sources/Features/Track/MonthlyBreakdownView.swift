@@ -200,7 +200,15 @@ private struct RecentRow: View {
                         .foregroundStyle(Color(hex: colorHex))
                 )
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+                HStack(spacing: 6) {
+                    Text(title).font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+                    if txn.autoPosted {
+                        Text("AUTO").font(.mono(8, .medium)).kerning(0.3)
+                            .foregroundStyle(Theme.Palette.green)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(Theme.Palette.greenSoft).clipShape(Capsule())
+                    }
+                }
                 Text(subtitle).font(.ui(11)).foregroundStyle(Theme.Palette.faint)
             }
             Spacer()
