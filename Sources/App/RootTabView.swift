@@ -58,6 +58,19 @@ func sectionView(for tab: AppTab) -> some View {
     }
 }
 
+/// One-shot tab routing — e.g. onboarding's "Continue to planning" sets this so
+/// the app opens on the Plan tab once. Returns nil on normal launches.
+func consumePendingTab() -> AppTab? {
+    guard let raw = UserDefaults.standard.string(forKey: "pendingTab") else { return nil }
+    UserDefaults.standard.removeObject(forKey: "pendingTab")
+    switch raw {
+    case "plan": return .plan
+    case "charts": return .charts
+    case "settings": return .settings
+    default: return .year
+    }
+}
+
 // MARK: - iPhone shell (custom bottom tab bar)
 
 private struct PhoneTabShell: View {
@@ -78,6 +91,7 @@ private struct PhoneTabShell: View {
         .sheet(isPresented: $showAdd) {
             AddTransactionView()
         }
+        .onAppear { if let t = consumePendingTab() { tab = t } }
     }
 
     @ViewBuilder private var currentScreen: some View {
@@ -194,6 +208,7 @@ private struct SidebarShell: View {
         .sheet(isPresented: $showAdd) {
             AddTransactionView()
         }
+        .onAppear { if let t = consumePendingTab() { selection = t } }
     }
 
     private var brand: some View {

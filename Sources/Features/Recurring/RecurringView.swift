@@ -187,6 +187,7 @@ private struct AddRecurringSheet: View {
                     Toggle("Auto-post each month", isOn: $autoPost).tint(Theme.Palette.green)
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Add recurring")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

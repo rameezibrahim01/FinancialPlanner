@@ -61,6 +61,7 @@ struct SettingsView: View {
             .readableContent()
         }
         .screenBackground()
+        .scrollDismissesKeyboard(.immediately)
         .navBarHiddenInCompact()
     }
 

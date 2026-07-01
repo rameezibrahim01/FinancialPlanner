@@ -5,6 +5,8 @@ import SwiftData
 struct SavingsGoalsView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Goal.order) private var goals: [Goal]
+    @State private var showGoalSheet = false
+    @State private var goalToEdit: Goal?
 
     private var hero: Goal? { goals.first }
     private var others: [Goal] { Array(goals.dropFirst()) }
@@ -13,10 +15,16 @@ struct SavingsGoalsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.section) {
                 header
-                if let hero { HeroGoalCard(goal: hero) }
-                ForEach(others, id: \.persistentModelID) { OtherGoalCard(goal: $0) }
+                if let hero {
+                    Button { edit(hero) } label: { HeroGoalCard(goal: hero) }
+                        .buttonStyle(.plain)
+                }
+                ForEach(others, id: \.persistentModelID) { goal in
+                    Button { edit(goal) } label: { OtherGoalCard(goal: goal) }
+                        .buttonStyle(.plain)
+                }
                 debtLink
-                DashedAddTile(title: "+ New goal", action: addGoal)
+                DashedAddTile(title: "+ New goal") { goalToEdit = nil; showGoalSheet = true }
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.bottom, Theme.Spacing.bottomSafe)
@@ -25,7 +33,23 @@ struct SavingsGoalsView: View {
         .screenBackground()
         .navigationTitle("Savings goals")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showGoalSheet) {
+            GoalSheet(goal: goalToEdit) { name, target, saved, monthly, deadline in
+                if let g = goalToEdit {
+                    g.name = name; g.target = target; g.saved = saved
+                    g.monthlyContribution = monthly; g.deadline = deadline
+                } else {
+                    let order = (goals.map(\.order).max() ?? -1) + 1
+                    context.insert(Goal(name: name, target: target, saved: saved, deadline: deadline,
+                                        monthlyContribution: monthly,
+                                        colorHex: Theme.CategoryColor.transport, order: order))
+                }
+                try? context.save()
+            }
+        }
     }
+
+    private func edit(_ goal: Goal) { goalToEdit = goal; showGoalSheet = true }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -61,11 +85,79 @@ struct SavingsGoalsView: View {
         .buttonStyle(.plain)
     }
 
-    private func addGoal() {
-        let order = (goals.map(\.order).max() ?? -1) + 1
-        context.insert(Goal(name: "New goal", target: 10000, saved: 0, deadline: nil,
-                            monthlyContribution: 1000, colorHex: Theme.CategoryColor.transport, order: order))
-        try? context.save()
+}
+
+// MARK: - Add / edit goal sheet
+
+private struct GoalSheet: View {
+    var goal: Goal?
+    /// (name, target, saved, monthlyContribution, deadline)
+    var onSave: (String, Double, Double, Double, Date?) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var targetText = ""
+    @State private var savedText = ""
+    @State private var monthlyText = ""
+    @State private var hasDeadline = false
+    @State private var deadline = Date()
+
+    private var target: Double { Double(targetText) ?? 0 }
+    private var saved: Double { Double(savedText) ?? 0 }
+    private var monthly: Double { Double(monthlyText) ?? 0 }
+    private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && target > 0 }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Goal") {
+                    TextField("Name (e.g. New car)", text: $name)
+                    amountRow("Target", $targetText)
+                    amountRow("Saved so far", $savedText)
+                }
+                Section("Pace") {
+                    amountRow("Contribution / month", $monthlyText)
+                    Toggle("Has a deadline", isOn: $hasDeadline).tint(Theme.Palette.green)
+                    if hasDeadline {
+                        DatePicker("Reach by", selection: $deadline, displayedComponents: .date)
+                    }
+                }
+            }
+            .scrollDismissesKeyboard(.immediately)
+            .navigationTitle(goal == nil ? "New goal" : "Edit goal")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        onSave(name.trimmingCharacters(in: .whitespaces), target, saved, monthly,
+                               hasDeadline ? deadline : nil)
+                        dismiss()
+                    }
+                    .fontWeight(.bold).disabled(!canSave)
+                }
+            }
+            .onAppear {
+                guard let g = goal else { return }
+                name = g.name
+                targetText = String(Int(g.target))
+                savedText = String(Int(g.saved))
+                monthlyText = String(Int(g.monthlyContribution))
+                if let d = g.deadline { hasDeadline = true; deadline = d }
+            }
+        }
+    }
+
+    private func amountRow(_ label: String, _ text: Binding<String>) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text("AED").foregroundStyle(Theme.Palette.muted)
+            TextField("0", text: text)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 120)
+        }
     }
 }
 

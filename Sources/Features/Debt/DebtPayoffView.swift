@@ -211,6 +211,7 @@ private struct AddDebtSheet: View {
                         TextField("Monthly payment", text: $paymentText).keyboardType(.decimalPad) }
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Add debt")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

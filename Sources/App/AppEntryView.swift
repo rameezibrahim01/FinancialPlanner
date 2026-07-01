@@ -17,7 +17,11 @@ struct AppEntryView: View {
             if hasCompletedOnboarding {
                 RootTabView()
             } else {
-                OnboardingFlowView { hasCompletedOnboarding = true }
+                OnboardingFlowView {
+                    // "Continue to planning" should land on the Plan tab.
+                    UserDefaults.standard.set("plan", forKey: "pendingTab")
+                    hasCompletedOnboarding = true
+                }
             }
 
             if appLock && isLocked {
