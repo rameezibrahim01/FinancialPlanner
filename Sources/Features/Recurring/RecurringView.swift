@@ -48,7 +48,7 @@ struct RecurringView: View {
                 item.categoryName = fields.category
                 item.colorHex = fields.color
                 item.tintHex = fields.tint
-                item.cadence = fields.cadence
+                item.cadenceRaw = fields.cadence.rawValue
                 item.dueDay = fields.dueDay
                 item.autoPost = fields.autoPost
                 try? context.save()
