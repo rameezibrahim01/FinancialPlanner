@@ -5,6 +5,7 @@ import SwiftData
 /// list, and an "Export backup file" action that serializes all on-device data
 /// to a JSON file the user can save or share (no network).
 struct SettingsView: View {
+    @Environment(\.modelContext) private var context
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Category.order) private var categories: [Category]
