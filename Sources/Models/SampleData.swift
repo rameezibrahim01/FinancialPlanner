@@ -40,33 +40,18 @@ enum SampleData {
         ("Other", Theme.CategoryColor.other),
     ]
 
-    /// Inserts any canonical category missing from the store. Idempotent, so it
-    /// runs every launch — that's how existing installs pick up newly added
-    /// categories (e.g. "School") without a reset.
-    @MainActor
-    static func ensureCategories(_ context: ModelContext) {
-        let existing = (try? context.fetch(FetchDescriptor<Category>())) ?? []
-        let names = Set(existing.map(\.name))
-        var order = (existing.map(\.order).max() ?? -1) + 1
-        var added = false
-        for (name, hex) in categories where !names.contains(name) {
-            context.insert(Category(name: name, colorHex: hex, order: order))
-            order += 1
-            added = true
-        }
-        if added { try? context.save() }
-    }
-
-    /// Bootstraps the essential scaffolding on first launch: the categories and
-    /// 12 empty month plans (there's no in-app "create plan" flow yet). Runs
-    /// every launch but only creates the month plans when none exist.
+    /// Bootstraps the essential scaffolding on first launch: the canonical
+    /// categories and 12 empty month plans (there's no in-app "create plan" flow
+    /// yet). The app is pre-release with no persisted user data to migrate, so
+    /// this only ever runs against an empty store — one guard covers everything.
     @MainActor
     static func seedIfNeeded(_ context: ModelContext) {
-        ensureCategories(context)
-
         let existing = (try? context.fetch(FetchDescriptor<MonthPlan>())) ?? []
         guard existing.isEmpty else { return }
 
+        for (i, entry) in categories.enumerated() {
+            context.insert(Category(name: entry.0, colorHex: entry.1, order: i))
+        }
         for m in 1...12 {
             context.insert(MonthPlan(year: year, month: m, plannedIncome: 0, budgets: []))
         }
