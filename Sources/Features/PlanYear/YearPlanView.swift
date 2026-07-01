@@ -6,8 +6,9 @@ struct YearPlanView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
 
-    /// Standalone yearly savings goal used by the summary pill (handoff: 60,000).
-    private let yearSavingsGoal: Double = 60000
+    /// User-settable annual savings goal (Settings). 0 = not set → the goal
+    /// pill/stat are hidden.
+    @AppStorage("annualSavingsGoal") private var yearSavingsGoal = 0.0
 
     private var totalIncome: Double { plans.reduce(0) { $0 + $1.plannedIncome } }
     private var totalBudget: Double { plans.reduce(0) { $0 + $1.budgetTotal } }
@@ -80,12 +81,14 @@ struct YearPlanView: View {
                 Text("Planned to save in 2026")
                     .font(.ui(13)).foregroundStyle(Theme.Palette.greenOnDark)
                 Spacer()
-                Text("\(goalPercent)% of goal")
-                    .font(.ui(12, .bold))
-                    .foregroundStyle(Theme.Palette.greenDark)
-                    .padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(Theme.Palette.greenAccent)
-                    .clipShape(Capsule())
+                if yearSavingsGoal > 0 {
+                    Text("\(goalPercent)% of goal")
+                        .font(.ui(12, .bold))
+                        .foregroundStyle(Theme.Palette.greenDark)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(Theme.Palette.greenAccent)
+                        .clipShape(Capsule())
+                }
             }
             Text(Money.aed(totalSavings)).tabular()
                 .font(.ui(36, .heavy)).kerning(-1)
@@ -94,7 +97,7 @@ struct YearPlanView: View {
             HStack(spacing: 0) {
                 miniStat("Income", totalIncome)
                 miniStat("Budget", totalBudget)
-                miniStat("Goal", yearSavingsGoal)
+                goalStat
             }
         }
         .padding(20)
@@ -108,6 +111,16 @@ struct YearPlanView: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(label).font(.ui(11)).foregroundStyle(Theme.Palette.greenOnDark2)
             Text(Money.plain(value)).tabular()
+                .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.greenOnDark3)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Goal stat — shows the user's annual goal, or "—" when none is set.
+    private var goalStat: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Goal").font(.ui(11)).foregroundStyle(Theme.Palette.greenOnDark2)
+            Text(yearSavingsGoal > 0 ? Money.plain(yearSavingsGoal) : "—").tabular()
                 .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.greenOnDark3)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

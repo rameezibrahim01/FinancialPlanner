@@ -66,6 +66,7 @@ enum Theme {
         static let dining = "#bd5a3c"
         static let utilities = "#6b7d6f"
         static let health = "#8b3f5a"
+        static let school = "#5b5f8b"
         static let other = "#8a928c"
     }
 

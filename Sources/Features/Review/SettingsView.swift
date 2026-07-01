@@ -10,7 +10,7 @@ struct SettingsView: View {
     @Query private var txns: [Transaction]
     @Query(sort: \Category.order) private var categories: [Category]
 
-    private let yearSavingsGoal: Double = 60000
+    @AppStorage("annualSavingsGoal") private var yearSavingsGoal = 0.0
 
     @State private var remindersOn = true
     @State private var rollOverOn = true
@@ -109,8 +109,8 @@ struct SettingsView: View {
         try? context.save()
 
         for key in ["hasCompletedOnboarding", "displayName", "startingSavings",
-                    "appLock", "lockTimeout", "autoBackup", "lastBackupAt",
-                    "pendingTab", "debtStrategy"] {
+                    "annualSavingsGoal", "appLock", "lockTimeout", "autoBackup",
+                    "lastBackupAt", "pendingTab", "debtStrategy"] {
             UserDefaults.standard.removeObject(forKey: key)
         }
 
@@ -138,7 +138,7 @@ struct SettingsView: View {
                 Text("Total saved").font(.ui(12)).foregroundStyle(Theme.Palette.greenOnDark)
                 Text(Money.aed(netSaved)).tabular()
                     .font(.ui(22, .heavy)).foregroundStyle(.white)
-                Text("vs \(Money.plain(yearSavingsGoal)) planned")
+                Text(yearSavingsGoal > 0 ? "vs \(Money.plain(yearSavingsGoal)) planned" : "no goal set")
                     .font(.ui(11)).foregroundStyle(Theme.Palette.greenOnDark2)
             }
             .padding(14)
@@ -176,6 +176,8 @@ struct SettingsView: View {
                 .padding(.horizontal, 4)
             Card(padding: 4, radius: Theme.Radius.card) {
                 VStack(spacing: 0) {
+                    savingsGoalRow
+                    divider
                     startingSavingsRow
                     divider
                     valueRow("Currency", "AED", tint: Theme.Palette.greenSoft, icon: "coloncurrencysign.circle")
@@ -235,6 +237,24 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    /// Annual savings goal — feeds the "% of goal" pill and goal stat on the
+    /// Year Plan, and the "vs … planned" subtext on the Total-saved card. 0 hides
+    /// those.
+    private var savingsGoalRow: some View {
+        HStack(spacing: 12) {
+            rowIcon(Theme.Palette.greenSoft2, "target")
+            Text("Savings goal / year").font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+            Spacer()
+            Text("AED").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
+            TextField("0", value: $yearSavingsGoal, format: .number)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .font(.ui(14, .semibold))
+                .frame(maxWidth: 110)
+        }
+        .padding(.vertical, 10).padding(.horizontal, 10)
     }
 
     private var startingSavingsRow: some View {

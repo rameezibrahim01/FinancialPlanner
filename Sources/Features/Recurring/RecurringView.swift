@@ -157,6 +157,7 @@ private struct AddRecurringSheet: View {
         ("Transport", Theme.CategoryColor.transport, "#dde6ea"),
         ("Utilities", Theme.CategoryColor.utilities, "#e1e6e2"),
         ("Health", Theme.CategoryColor.health, "#efe0e6"),
+        ("School", Theme.CategoryColor.school, "#e2e0ee"),
         ("Subscriptions", "#8b6b3f", "#ece1d2"),
         ("Other", Theme.CategoryColor.other, "#e6e6df"),
     ]
