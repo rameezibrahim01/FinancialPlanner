@@ -25,13 +25,17 @@ final class IncomeSource {
     var amount: Double
     var recurring: Bool
     var tintHex: String
+    /// year*100+month of the last month this income was auto-posted (0 = never).
+    var lastPostedPeriod: Int = 0
 
-    init(name: String, cadence: String, amount: Double, recurring: Bool, tintHex: String) {
+    init(name: String, cadence: String, amount: Double, recurring: Bool, tintHex: String,
+         lastPostedPeriod: Int = 0) {
         self.name = name
         self.cadence = cadence
         self.amount = amount
         self.recurring = recurring
         self.tintHex = tintHex
+        self.lastPostedPeriod = lastPostedPeriod
     }
 }
 
@@ -98,14 +102,18 @@ final class Transaction {
     var categoryName: String
     var date: Date
     var note: String
+    /// True when created automatically from an income source / recurring bill.
+    var autoPosted: Bool = false
 
-    init(type: TxType, amount: Double, categoryName: String, date: Date, note: String = "") {
+    init(type: TxType, amount: Double, categoryName: String, date: Date, note: String = "",
+         autoPosted: Bool = false) {
         self.id = UUID()
         self.typeRaw = type.rawValue
         self.amount = amount
         self.categoryName = categoryName
         self.date = date
         self.note = note
+        self.autoPosted = autoPosted
     }
 
     var type: TxType { TxType(rawValue: typeRaw) ?? .expense }
@@ -145,9 +153,12 @@ final class Recurring {
     var dueDay: Int           // 1...28
     var autoPost: Bool
     var order: Int
+    /// year*100+month of the last month this bill was auto-posted (0 = never).
+    var lastPostedPeriod: Int = 0
 
     init(name: String, amount: Double, categoryName: String, colorHex: String,
-         tintHex: String, cadence: RecurringCadence, dueDay: Int, autoPost: Bool, order: Int) {
+         tintHex: String, cadence: RecurringCadence, dueDay: Int, autoPost: Bool, order: Int,
+         lastPostedPeriod: Int = 0) {
         self.id = UUID()
         self.name = name
         self.amount = amount
@@ -158,6 +169,7 @@ final class Recurring {
         self.dueDay = dueDay
         self.autoPost = autoPost
         self.order = order
+        self.lastPostedPeriod = lastPostedPeriod
     }
 
     var cadence: RecurringCadence { RecurringCadence(rawValue: cadenceRaw) ?? .monthly }
