@@ -5,6 +5,7 @@ import SwiftData
 /// list, and an "Export backup file" action that serializes all on-device data
 /// to a JSON file the user can save or share (no network).
 struct SettingsView: View {
+    @Environment(\.modelContext) private var context
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Category.order) private var categories: [Category]
@@ -16,6 +17,7 @@ struct SettingsView: View {
     @AppStorage("appLock") private var appLock = false
     @AppStorage("lockTimeout") private var lockTimeout = 0   // minutes; 0 = immediately
     @AppStorage("startingSavings") private var startingSavings = 0.0
+    @State private var showClearConfirm = false
 
     // MARK: Derived
 
@@ -54,6 +56,7 @@ struct SettingsView: View {
                 statGrid
                 settingsList
                 securitySection
+                developerSection
             }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
@@ -63,6 +66,55 @@ struct SettingsView: View {
         .screenBackground()
         .scrollDismissesKeyboard(.immediately)
         .navBarHiddenInCompact()
+        .alert("Clear all data?", isPresented: $showClearConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Clear everything", role: .destructive) { clearAllData() }
+        } message: {
+            Text("Wipes all plans, transactions, goals, recurring, debts and settings, and restarts onboarding. This can't be undone.")
+        }
+    }
+
+    // MARK: Developer (temporary — for testing)
+
+    private var developerSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Developer").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                .padding(.horizontal, 4)
+            Button {
+                showClearConfirm = true
+            } label: {
+                Text("Clear all data")
+                    .font(.ui(16, .bold)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).padding(16)
+                    .background(Theme.Palette.clay)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            Text("Testing only — resets the app to a fresh install and restarts onboarding.")
+                .font(.ui(11)).foregroundStyle(Theme.Palette.muted).padding(.horizontal, 4)
+        }
+    }
+
+    /// Wipes every model + persisted preference, then re-seeds the essential
+    /// scaffolding so the app restarts at onboarding, as if freshly installed.
+    private func clearAllData() {
+        try? context.delete(model: Transaction.self)
+        try? context.delete(model: CategoryBudget.self)
+        try? context.delete(model: MonthPlan.self)
+        try? context.delete(model: Goal.self)
+        try? context.delete(model: Recurring.self)
+        try? context.delete(model: Debt.self)
+        try? context.delete(model: IncomeSource.self)
+        try? context.delete(model: Category.self)
+        try? context.save()
+
+        for key in ["hasCompletedOnboarding", "displayName", "startingSavings",
+                    "appLock", "lockTimeout", "autoBackup", "lastBackupAt",
+                    "pendingTab", "debtStrategy"] {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+
+        SampleData.seedIfNeeded(context)
     }
 
     // MARK: Header
