@@ -7,12 +7,17 @@ import SwiftData
 enum SampleData {
     static let year = 2026
 
-    /// Master switch for the demo/sample data. Set to `false` to ship an empty
-    /// app that starts with no plans, transactions, goals, recurring or debts —
-    /// the user builds everything from onboarding. Note: this only controls
-    /// *first-launch* seeding; data already seeded on a device persists until
-    /// the store is cleared (delete the app, or restore an empty backup).
-    static let seedSampleData = true
+    /// When `true`, first launch is populated with demo content (sample income,
+    /// budgets, a year of transactions, goals, recurring bills, debts, the
+    /// "Sara" name and a 40k starting balance) so the app is explorable out of
+    /// the box. When `false` (the default) the app starts clean — only the
+    /// essential scaffolding (the 8 categories + 12 empty month plans) is
+    /// created so the Plan/Track flows still work, and the user builds
+    /// everything themselves.
+    ///
+    /// Note: this only controls *first-launch* seeding; data already on a device
+    /// persists until the store is cleared (delete the app or restore a backup).
+    static let seedSampleData = false
 
     static func cal() -> Calendar {
         var c = Calendar(identifier: .gregorian)
@@ -108,19 +113,46 @@ enum SampleData {
 
     @MainActor
     static func seedIfNeeded(_ context: ModelContext) {
-        guard seedSampleData else { return }
         let existing = (try? context.fetch(FetchDescriptor<MonthPlan>())) ?? []
         guard existing.isEmpty else { return }
 
-        // Seed a starting savings balance (the user's existing savings) so the
-        // dashboard's "Total savings" reflects real wealth, not just this year.
-        if UserDefaults.standard.object(forKey: "startingSavings") == nil {
-            UserDefaults.standard.set(40000, forKey: "startingSavings")
-        }
-
-        // Categories
+        // --- Always seeded: the essential scaffolding, so the app works even
+        // with demo data off. Categories are needed to categorize expenses, and
+        // the 12 month plans must exist because there's no in-app "create plan"
+        // flow yet. When demo data is off the plans start empty (0 income, no
+        // budgets) for the user to fill in.
         for (i, (name, hex)) in categories.enumerated() {
             context.insert(Category(name: name, colorHex: hex, order: i))
+        }
+
+        var monthPlans: [MonthPlan] = []
+        for m in 1...12 {
+            let plan: MonthPlan
+            if seedSampleData {
+                let total = monthlyBudgetTotal[m - 1]
+                let defs: [(String, String, Double)]
+                switch m {
+                case 3:  defs = marchBudgets
+                case 6:  defs = juneBudgets
+                default: defs = budgets(forTotal: total)
+                }
+                let budgetModels = defs.enumerated().map { idx, d in
+                    CategoryBudget(categoryName: d.0, colorHex: d.1, amount: d.2, order: idx)
+                }
+                plan = MonthPlan(year: year, month: m, plannedIncome: monthlyIncome[m - 1], budgets: budgetModels)
+            } else {
+                plan = MonthPlan(year: year, month: m, plannedIncome: 0, budgets: [])
+            }
+            context.insert(plan)
+            monthPlans.append(plan)
+        }
+
+        // --- Everything below is demo content, gated behind the flag.
+        guard seedSampleData else { try? context.save(); return }
+
+        UserDefaults.standard.set("Sara", forKey: "displayName")
+        if UserDefaults.standard.object(forKey: "startingSavings") == nil {
+            UserDefaults.standard.set(40000, forKey: "startingSavings")
         }
 
         // Income sources
@@ -128,25 +160,6 @@ enum SampleData {
                                     amount: 18500, recurring: true, tintHex: "#dbeae1"))
         context.insert(IncomeSource(name: "Freelance", cadence: "Avg / month",
                                     amount: 1200, recurring: true, tintHex: "#e6ead7"))
-
-        // Month plans
-        var monthPlans: [MonthPlan] = []
-        for m in 1...12 {
-            let income = monthlyIncome[m - 1]
-            let total = monthlyBudgetTotal[m - 1]
-            let defs: [(String, String, Double)]
-            switch m {
-            case 3:  defs = marchBudgets
-            case 6:  defs = juneBudgets
-            default: defs = budgets(forTotal: total)
-            }
-            let budgetModels = defs.enumerated().map { idx, d in
-                CategoryBudget(categoryName: d.0, colorHex: d.1, amount: d.2, order: idx)
-            }
-            let plan = MonthPlan(year: year, month: m, plannedIncome: income, budgets: budgetModels)
-            context.insert(plan)
-            monthPlans.append(plan)
-        }
 
         // Actual transactions for the whole year — the source of truth for the
         // Track/Review lanes. Each month gets a salary income plus per-category

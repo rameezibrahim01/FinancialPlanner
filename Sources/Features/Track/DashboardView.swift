@@ -6,7 +6,7 @@ import SwiftData
 /// from transactions + plan + recurring; nothing new is persisted.
 struct DashboardView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @AppStorage("displayName") private var displayName = "Sara"
+    @AppStorage("displayName") private var displayName = ""
     @AppStorage("startingSavings") private var startingSavings = 0.0
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
@@ -137,7 +137,7 @@ struct DashboardView: View {
                 Text("\(MonthPlan.longNames[curMonth - 1].uppercased()) · AED")
                     .font(.mono(11, .medium)).kerning(0.5)
                     .foregroundStyle(Theme.Palette.muted)
-                Text("Hello, \(displayName)")
+                Text(displayName.isEmpty ? "Welcome back" : "Hello, \(displayName)")
                     .font(.ui(30, .heavy)).kerning(-0.8)
                     .foregroundStyle(Theme.Palette.ink)
             }
