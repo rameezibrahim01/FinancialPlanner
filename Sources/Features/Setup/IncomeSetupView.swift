@@ -11,19 +11,21 @@ struct IncomeSetupView: View {
     @Query private var plans: [MonthPlan]
     @AppStorage("startingSavings") private var startingSavings = 0.0
     @State private var showAdd = false
+    @State private var goToBudget = false
 
     private var monthlyIncome: Double { sources.reduce(0) { $0 + $1.amount } }
     private var projectedAnnual: Double { monthlyIncome * 12 }
+    private var currentMonth: Int { SampleData.cal().component(.month, from: SampleData.referenceToday) }
+    private var currentYear: Int { SampleData.cal().component(.year, from: SampleData.referenceToday) }
 
-    /// Carries the monthly income total into every month's plan so the planning
-    /// screen is populated after setup. Only fills months not already set, so it
-    /// never clobbers income the user (or demo data) has already entered.
-    private func finishSetup() {
-        for plan in plans where plan.plannedIncome == 0 {
+    /// Carries the monthly income into the current month and every later month so
+    /// the plan is populated. Past months stay at 0 (you weren't planning then).
+    private func applyIncome() {
+        for plan in plans where plan.year == currentYear && plan.month >= currentMonth
+            && plan.plannedIncome == 0 {
             plan.plannedIncome = monthlyIncome
         }
         try? context.save()
-        onFinish()
     }
 
     var body: some View {
@@ -50,6 +52,9 @@ struct IncomeSetupView: View {
         }
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $goToBudget) {
+            BudgetSetupView(onFinish: onFinish)
+        }
         .sheet(isPresented: $showAdd) {
             AddIncomeSheet { name, cadence, amount, recurring in
                 let tints = ["#dbeae1", "#e6ead7", "#eef6f1", "#eaf2ed"]
@@ -65,7 +70,7 @@ struct IncomeSetupView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("SETUP").font(.mono(11, .medium)).kerning(0.5)
+            Text("SETUP · 1 OF 2").font(.mono(11, .medium)).kerning(0.5)
                 .foregroundStyle(Theme.Palette.faint)
             Text("Your income").font(.ui(26, .heavy)).kerning(-0.6)
                 .foregroundStyle(Theme.Palette.ink)
@@ -115,7 +120,7 @@ struct IncomeSetupView: View {
     // MARK: Footer
 
     private var footer: some View {
-        PrimaryButton(title: "Continue to planning", action: finishSetup)
+        PrimaryButton(title: "Continue") { applyIncome(); goToBudget = true }
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
