@@ -2,30 +2,35 @@ import SwiftUI
 import SwiftData
 
 /// B2 · Month Plan editor ★ — set income & per-category budgets for one month.
-/// "Planned savings" = income − sum(budgets) updates live; the allocation meter
-/// follows, and over-allocation (savings < 0) surfaces as a clay warning.
+/// Every category is shown up front with a tap-to-type amount; planned savings
+/// and the allocation meter update live. "Apply this to all months" fans the
+/// month's budget out across the year so you only set it up once.
 struct MonthPlanEditorView: View {
     @Bindable var plan: MonthPlan
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Query(sort: \Category.order) private var categories: [Category]
+    @Query private var allPlans: [MonthPlan]
     @State private var editingIncome = false
     @State private var incomeText = ""
+    @State private var showApplied = false
 
     private var budgetTotal: Double { plan.budgetTotal }
     private var savings: Double { plan.plannedSavings }
     private var overAllocated: Bool { savings < 0 }
-    /// Slider fills are drawn relative to the largest category (handoff: Housing
-    /// 100%, Groceries 48%, …), so the bars stay proportional as budgets change.
-    private var sliderScale: Double { max(plan.budgets.map(\.amount).max() ?? 0, 5000) }
+    /// Bars are drawn relative to the largest category (with a floor so a single
+    /// small budget doesn't fill the whole bar).
+    private var barScale: Double { max(plan.budgets.map(\.amount).max() ?? 0, 1000) }
 
     var body: some View {
         ScrollView {
             if sizeClass == .regular {
-                // iPad: summary + actions on the left, category sliders on the right.
+                // iPad: summary + actions on the left, category budgets on the right.
                 HStack(alignment: .top, spacing: Theme.Spacing.section) {
                     VStack(spacing: Theme.Spacing.section) {
                         summaryCard
+                        applyButton
                         planVsActualLink
                     }
                     .frame(maxWidth: 340, alignment: .top)
@@ -44,6 +49,7 @@ struct MonthPlanEditorView: View {
                     summaryCard
                     categoriesHeader
                     categoryList
+                    applyButton
                     planVsActualLink
                 }
                 .padding(.horizontal, Theme.Spacing.side)
@@ -51,18 +57,20 @@ struct MonthPlanEditorView: View {
                 .readableContent()
             }
         }
+        .scrollDismissesKeyboard(.immediately)
         .screenBackground()
         .navigationTitle(Text(verbatim: "\(plan.monthLong) \(plan.year) plan"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
+                Button("Done") {
                     try? context.save()
                     dismiss()
                 }
                 .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.green)
             }
         }
+        .onAppear(perform: ensureAllCategories)
         .alert("Planned income", isPresented: $editingIncome) {
             TextField("Amount", text: $incomeText).keyboardType(.numberPad)
             Button("Cancel", role: .cancel) {}
@@ -72,6 +80,11 @@ struct MonthPlanEditorView: View {
                     try? context.save()
                 }
             }
+        }
+        .alert("Applied to all months", isPresented: $showApplied) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("This month's income and category budgets were copied to every month of \(String(plan.year)).")
         }
     }
 
@@ -84,11 +97,15 @@ struct MonthPlanEditorView: View {
                     Text("Planned income").font(.ui(14)).foregroundStyle(Theme.Palette.inkSecondary)
                     Spacer()
                     Button {
-                        incomeText = String(Int(plan.plannedIncome))
+                        incomeText = plan.plannedIncome > 0 ? String(Int(plan.plannedIncome)) : ""
                         editingIncome = true
                     } label: {
-                        Text(Money.aed(plan.plannedIncome)).tabular()
-                            .font(.ui(18, .heavy)).foregroundStyle(Theme.Palette.ink)
+                        HStack(spacing: 4) {
+                            Text(Money.aed(plan.plannedIncome)).tabular()
+                                .font(.ui(18, .heavy)).foregroundStyle(Theme.Palette.ink)
+                            Image(systemName: "pencil").font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Theme.Palette.green)
+                        }
                     }
                     .buttonStyle(.plain)
                 }
@@ -125,14 +142,35 @@ struct MonthPlanEditorView: View {
         }
     }
 
+    // MARK: Categories
+
+    private var categoriesHeader: some View {
+        HStack {
+            Text("Category budgets").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+            Spacer()
+            Text("tap an amount to type").font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+        }
+        .padding(.horizontal, 4)
+    }
+
     private var categoryList: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 16) {
             ForEach(plan.orderedBudgets, id: \.persistentModelID) { budget in
-                CategoryBudgetRow(budget: budget, scale: sliderScale) {
-                    try? context.save()
-                }
+                CategoryBudgetRow(budget: budget, maxAmount: barScale)
             }
         }
+    }
+
+    private var applyButton: some View {
+        Button(action: applyToAllMonths) {
+            Text("Apply this to all months")
+                .font(.ui(15, .bold)).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).padding(14)
+                .background(Theme.Palette.green)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+                .appShadow(.primaryButton)
+        }
+        .buttonStyle(.plain)
     }
 
     private var planVsActualLink: some View {
@@ -147,26 +185,33 @@ struct MonthPlanEditorView: View {
         }
     }
 
-    private var categoriesHeader: some View {
-        HStack {
-            Text("Category budgets").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
-            Spacer()
-            Button {
-                addCategory()
-            } label: {
-                Text("+ Add").font(.ui(12, .semibold)).foregroundStyle(Theme.Palette.green)
-            }
+    // MARK: Actions
+
+    /// Ensures every category has a (possibly zero) budget row so the whole list
+    /// is visible for editing — no adding categories one at a time.
+    private func ensureAllCategories() {
+        let existing = Set(plan.budgets.map(\.categoryName))
+        var added = false
+        for cat in categories where !existing.contains(cat.name) {
+            plan.budgets.append(CategoryBudget(categoryName: cat.name, colorHex: cat.colorHex,
+                                               amount: 0, order: cat.order))
+            added = true
         }
-        .padding(.horizontal, 4)
+        if added { try? context.save() }
     }
 
-    private func addCategory() {
-        let used = Set(plan.budgets.map(\.categoryName))
-        let next = SampleData.categories.first { !used.contains($0.0) }
-        guard let next else { return }
-        let order = (plan.budgets.map(\.order).max() ?? -1) + 1
-        plan.budgets.append(CategoryBudget(categoryName: next.0, colorHex: next.1, amount: 0, order: order))
+    /// Copies this month's income + category budgets to every other month of the year.
+    private func applyToAllMonths() {
+        let template = plan.orderedBudgets.map { ($0.categoryName, $0.colorHex, $0.amount, $0.order) }
+        for p in allPlans where p.year == plan.year && p.persistentModelID != plan.persistentModelID {
+            for b in p.budgets { context.delete(b) }
+            p.budgets = template.map {
+                CategoryBudget(categoryName: $0.0, colorHex: $0.1, amount: $0.2, order: $0.3)
+            }
+            p.plannedIncome = plan.plannedIncome
+        }
         try? context.save()
+        showApplied = true
     }
 }
 
@@ -198,83 +243,32 @@ private struct AllocationMeter: View {
     }
 }
 
-// MARK: - Category budget row with slider
+// MARK: - Category budget row (tap-to-type amount + proportion bar)
 
 private struct CategoryBudgetRow: View {
     @Bindable var budget: CategoryBudget
-    let scale: Double
-    var onChange: () -> Void
-    @State private var editing = false
-    @State private var amountText = ""
+    let maxAmount: Double
+    @State private var text = ""
 
     var body: some View {
-        VStack(spacing: 9) {
+        VStack(spacing: 8) {
             HStack(spacing: 8) {
                 ColorSquare(hex: budget.colorHex, size: 9)
                 Text(budget.categoryName).font(.ui(13, .semibold)).foregroundStyle(Theme.Palette.ink)
                 Spacer()
-                // Tap the amount to type an exact value (the slider caps at the
-                // largest category, so typing is the reliable way to set a budget).
-                Button {
-                    amountText = String(Int(budget.amount))
-                    editing = true
-                } label: {
-                    Text(Money.plain(budget.amount)).tabular()
-                        .font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
-                }
-                .buttonStyle(.plain)
-            }
-            BudgetSlider(value: $budget.amount, maxValue: scale, colorHex: budget.colorHex,
-                         onChange: onChange)
-        }
-        .alert("\(budget.categoryName) budget", isPresented: $editing) {
-            TextField("Amount", text: $amountText).keyboardType(.numberPad)
-            Button("Cancel", role: .cancel) {}
-            Button("Set") {
-                if let v = Double(amountText.filter(\.isNumber)) {
-                    budget.amount = v
-                    onChange()
-                }
-            }
-        } message: {
-            Text("Enter the monthly budget for \(budget.categoryName).")
-        }
-    }
-}
-
-// MARK: - Custom draggable slider
-
-private struct BudgetSlider: View {
-    @Binding var value: Double
-    let maxValue: Double
-    let colorHex: String
-    var onChange: () -> Void
-
-    var body: some View {
-        GeometryReader { geo in
-            let w = geo.size.width
-            let frac = maxValue > 0 ? min(1, max(0, value / maxValue)) : 0
-            ZStack(alignment: .leading) {
-                Capsule().fill(Theme.Palette.hairline).frame(height: 6)
-                Capsule().fill(Color(hex: colorHex))
-                    .frame(width: frac * w, height: 6)
-                Circle().fill(.white)
-                    .frame(width: 16, height: 16)
-                    .overlay(Circle().stroke(Color(hex: colorHex), lineWidth: 2))
-                    .appShadow(.card)
-                    .offset(x: frac * w - 8)
-            }
-            .frame(height: 16)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { g in
-                        let p = min(1, max(0, g.location.x / w))
-                        value = (p * maxValue / 50).rounded() * 50
+                Text("AED").font(.ui(12)).foregroundStyle(Theme.Palette.muted)
+                TextField("0", text: $text)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                    .frame(maxWidth: 90)
+                    .onChange(of: text) { _, new in
+                        budget.amount = Double(new.filter(\.isNumber)) ?? 0
                     }
-                    .onEnded { _ in onChange() }
-            )
+            }
+            TrackBar(fraction: maxAmount > 0 ? min(1, budget.amount / maxAmount) : 0,
+                     height: 6, fill: Color(hex: budget.colorHex))
         }
-        .frame(height: 16)
+        .onAppear { text = budget.amount > 0 ? String(Int(budget.amount)) : "" }
     }
 }

@@ -8,10 +8,23 @@ struct IncomeSetupView: View {
 
     @Environment(\.modelContext) private var context
     @Query(sort: \IncomeSource.amount, order: .reverse) private var sources: [IncomeSource]
+    @Query private var plans: [MonthPlan]
     @AppStorage("startingSavings") private var startingSavings = 0.0
     @State private var showAdd = false
 
-    private var projectedAnnual: Double { sources.reduce(0) { $0 + $1.amount } * 12 }
+    private var monthlyIncome: Double { sources.reduce(0) { $0 + $1.amount } }
+    private var projectedAnnual: Double { monthlyIncome * 12 }
+
+    /// Carries the monthly income total into every month's plan so the planning
+    /// screen is populated after setup. Only fills months not already set, so it
+    /// never clobbers income the user (or demo data) has already entered.
+    private func finishSetup() {
+        for plan in plans where plan.plannedIncome == 0 {
+            plan.plannedIncome = monthlyIncome
+        }
+        try? context.save()
+        onFinish()
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -102,7 +115,7 @@ struct IncomeSetupView: View {
     // MARK: Footer
 
     private var footer: some View {
-        PrimaryButton(title: "Continue to planning", action: onFinish)
+        PrimaryButton(title: "Continue to planning", action: finishSetup)
             .padding(.horizontal, Theme.Spacing.side)
             .padding(.top, 8)
             .padding(.bottom, Theme.Spacing.bottomSafe)
