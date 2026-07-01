@@ -51,7 +51,7 @@ enum SampleData {
     static let monthlyActualFill: [Double] =
         [0.82,0.88,0.80,0.74,0.92,0,0.86,0.90,0.78,1.36,1.14,0.96]
 
-    // The 8 categories with their authoritative accent colors.
+    // The canonical categories with their authoritative accent colors.
     static let categories: [(String, String)] = [
         ("Housing", Theme.CategoryColor.housing),
         ("Groceries", Theme.CategoryColor.groceries),
@@ -60,6 +60,7 @@ enum SampleData {
         ("Dining", Theme.CategoryColor.dining),
         ("Utilities", Theme.CategoryColor.utilities),
         ("Health", Theme.CategoryColor.health),
+        ("School", Theme.CategoryColor.school),
         ("Other", Theme.CategoryColor.other),
     ]
 
@@ -111,20 +112,34 @@ enum SampleData {
         return result
     }
 
+    /// Inserts any canonical category missing from the store. Idempotent, so it
+    /// runs every launch — that's how existing installs pick up newly added
+    /// categories (e.g. "School") without a reset.
+    @MainActor
+    static func ensureCategories(_ context: ModelContext) {
+        let existing = (try? context.fetch(FetchDescriptor<Category>())) ?? []
+        let names = Set(existing.map(\.name))
+        var order = (existing.map(\.order).max() ?? -1) + 1
+        var added = false
+        for (name, hex) in categories where !names.contains(name) {
+            context.insert(Category(name: name, colorHex: hex, order: order))
+            order += 1
+            added = true
+        }
+        if added { try? context.save() }
+    }
+
     @MainActor
     static func seedIfNeeded(_ context: ModelContext) {
+        // Top up the canonical categories every launch (idempotent).
+        ensureCategories(context)
+
         let existing = (try? context.fetch(FetchDescriptor<MonthPlan>())) ?? []
         guard existing.isEmpty else { return }
 
-        // --- Always seeded: the essential scaffolding, so the app works even
-        // with demo data off. Categories are needed to categorize expenses, and
-        // the 12 month plans must exist because there's no in-app "create plan"
-        // flow yet. When demo data is off the plans start empty (0 income, no
-        // budgets) for the user to fill in.
-        for (i, (name, hex)) in categories.enumerated() {
-            context.insert(Category(name: name, colorHex: hex, order: i))
-        }
-
+        // --- Always seeded: the 12 month plans must exist because there's no
+        // in-app "create plan" flow yet. When demo data is off the plans start
+        // empty (0 income, no budgets) for the user to fill in.
         var monthPlans: [MonthPlan] = []
         for m in 1...12 {
             let plan: MonthPlan
