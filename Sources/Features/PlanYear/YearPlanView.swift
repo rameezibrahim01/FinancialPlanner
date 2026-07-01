@@ -151,7 +151,7 @@ struct YearPlanView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            SecondaryButton(title: "Copy to all months", action: copyToAllMonths)
+            SecondaryButton(title: "Copy to remaining months", action: copyToAllMonths)
             if let plan = defaultMonthPlan {
                 NavigationLink {
                     MonthPlanEditorView(plan: plan)
@@ -174,10 +174,10 @@ struct YearPlanView: View {
         return plans.first { $0.month == m } ?? plans.first
     }
 
-    /// Applies one month's category budgets (and planned income) to every other
-    /// month. The source is the first month that actually has budgets set — so
-    /// once you've set up a single month, "Copy to all months" fans it out.
-    /// (Falls back to the current month if none have budgets yet.)
+    /// Applies one month's category budgets (and planned income) to the current
+    /// month and every later month — past months are left untouched. The source
+    /// is the first month that actually has budgets set, so once you've set up a
+    /// single month, this fans it out across the rest of the year.
     private func copyToAllMonths() {
         let currentMonth = SampleData.cal().component(.month, from: SampleData.referenceToday)
         guard let source = plans.first(where: { $0.budgetTotal > 0 })
@@ -186,7 +186,9 @@ struct YearPlanView: View {
         guard source.budgetTotal > 0 else { return }   // nothing to copy yet
 
         let template = source.orderedBudgets.map { ($0.categoryName, $0.colorHex, $0.amount, $0.order) }
-        for plan in plans where plan.persistentModelID != source.persistentModelID {
+        for plan in plans where plan.year == source.year
+            && plan.month >= currentMonth
+            && plan.persistentModelID != source.persistentModelID {
             for b in plan.budgets { context.delete(b) }
             plan.budgets = template.map {
                 CategoryBudget(categoryName: $0.0, colorHex: $0.1, amount: $0.2, order: $0.3)

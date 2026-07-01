@@ -22,6 +22,8 @@ struct MonthPlanEditorView: View {
     /// Bars are drawn relative to the largest category (with a floor so a single
     /// small budget doesn't fill the whole bar).
     private var barScale: Double { max(plan.budgets.map(\.amount).max() ?? 0, 1000) }
+    /// The current calendar month — "apply to all" only affects this month and later.
+    private var currentMonth: Int { SampleData.cal().component(.month, from: SampleData.referenceToday) }
 
     var body: some View {
         ScrollView {
@@ -81,10 +83,10 @@ struct MonthPlanEditorView: View {
                 }
             }
         }
-        .alert("Applied to all months", isPresented: $showApplied) {
+        .alert("Applied to remaining months", isPresented: $showApplied) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("This month's income and category budgets were copied to every month of \(String(plan.year)).")
+            Text("This month's income and category budgets were copied to \(MonthPlan.longNames[currentMonth - 1]) \(String(plan.year)) and every later month. Earlier months were left unchanged.")
         }
     }
 
@@ -163,7 +165,7 @@ struct MonthPlanEditorView: View {
 
     private var applyButton: some View {
         Button(action: applyToAllMonths) {
-            Text("Apply this to all months")
+            Text("Apply to remaining months")
                 .font(.ui(15, .bold)).foregroundStyle(.white)
                 .frame(maxWidth: .infinity).padding(14)
                 .background(Theme.Palette.green)
@@ -200,10 +202,14 @@ struct MonthPlanEditorView: View {
         if added { try? context.save() }
     }
 
-    /// Copies this month's income + category budgets to every other month of the year.
+    /// Copies this month's income + category budgets to the current month and
+    /// every later month of the year. Past months are left untouched — planning
+    /// is forward-looking.
     private func applyToAllMonths() {
         let template = plan.orderedBudgets.map { ($0.categoryName, $0.colorHex, $0.amount, $0.order) }
-        for p in allPlans where p.year == plan.year && p.persistentModelID != plan.persistentModelID {
+        for p in allPlans where p.year == plan.year
+            && p.month >= currentMonth
+            && p.persistentModelID != plan.persistentModelID {
             for b in p.budgets { context.delete(b) }
             p.budgets = template.map {
                 CategoryBudget(categoryName: $0.0, colorHex: $0.1, amount: $0.2, order: $0.3)
