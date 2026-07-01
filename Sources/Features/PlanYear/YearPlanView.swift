@@ -174,15 +174,24 @@ struct YearPlanView: View {
         return plans.first { $0.month == m } ?? plans.first
     }
 
-    /// Applies the current (March) month's category budgets to every month.
+    /// Applies one month's category budgets (and planned income) to every other
+    /// month. The source is the first month that actually has budgets set — so
+    /// once you've set up a single month, "Copy to all months" fans it out.
+    /// (Falls back to the current month if none have budgets yet.)
     private func copyToAllMonths() {
-        guard let source = plans.first(where: { $0.month == 3 }) ?? plans.first else { return }
+        let currentMonth = SampleData.cal().component(.month, from: SampleData.referenceToday)
+        guard let source = plans.first(where: { $0.budgetTotal > 0 })
+                ?? plans.first(where: { $0.month == currentMonth })
+                ?? plans.first else { return }
+        guard source.budgetTotal > 0 else { return }   // nothing to copy yet
+
         let template = source.orderedBudgets.map { ($0.categoryName, $0.colorHex, $0.amount, $0.order) }
         for plan in plans where plan.persistentModelID != source.persistentModelID {
             for b in plan.budgets { context.delete(b) }
             plan.budgets = template.map {
                 CategoryBudget(categoryName: $0.0, colorHex: $0.1, amount: $0.2, order: $0.3)
             }
+            plan.plannedIncome = source.plannedIncome
         }
         try? context.save()
     }

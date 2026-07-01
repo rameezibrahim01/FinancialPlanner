@@ -17,7 +17,7 @@ struct MonthPlanEditorView: View {
     private var overAllocated: Bool { savings < 0 }
     /// Slider fills are drawn relative to the largest category (handoff: Housing
     /// 100%, Groceries 48%, …), so the bars stay proportional as budgets change.
-    private var sliderScale: Double { max(plan.budgets.map(\.amount).max() ?? 1, 1) }
+    private var sliderScale: Double { max(plan.budgets.map(\.amount).max() ?? 0, 5000) }
 
     var body: some View {
         ScrollView {
@@ -204,6 +204,8 @@ private struct CategoryBudgetRow: View {
     @Bindable var budget: CategoryBudget
     let scale: Double
     var onChange: () -> Void
+    @State private var editing = false
+    @State private var amountText = ""
 
     var body: some View {
         VStack(spacing: 9) {
@@ -211,11 +213,31 @@ private struct CategoryBudgetRow: View {
                 ColorSquare(hex: budget.colorHex, size: 9)
                 Text(budget.categoryName).font(.ui(13, .semibold)).foregroundStyle(Theme.Palette.ink)
                 Spacer()
-                Text(Money.plain(budget.amount)).tabular()
-                    .font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
+                // Tap the amount to type an exact value (the slider caps at the
+                // largest category, so typing is the reliable way to set a budget).
+                Button {
+                    amountText = String(Int(budget.amount))
+                    editing = true
+                } label: {
+                    Text(Money.plain(budget.amount)).tabular()
+                        .font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
+                }
+                .buttonStyle(.plain)
             }
             BudgetSlider(value: $budget.amount, maxValue: scale, colorHex: budget.colorHex,
                          onChange: onChange)
+        }
+        .alert("\(budget.categoryName) budget", isPresented: $editing) {
+            TextField("Amount", text: $amountText).keyboardType(.numberPad)
+            Button("Cancel", role: .cancel) {}
+            Button("Set") {
+                if let v = Double(amountText.filter(\.isNumber)) {
+                    budget.amount = v
+                    onChange()
+                }
+            }
+        } message: {
+            Text("Enter the monthly budget for \(budget.categoryName).")
         }
     }
 }

@@ -32,6 +32,7 @@ struct IncomeSetupView: View {
                 .padding(.bottom, Theme.Spacing.bottomSafe)
                 .readableContent(640)
             }
+            .scrollDismissesKeyboard(.immediately)
             footer
         }
         .screenBackground()
@@ -51,7 +52,7 @@ struct IncomeSetupView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("SETUP · 1 OF 2").font(.mono(11, .medium)).kerning(0.5)
+            Text("SETUP").font(.mono(11, .medium)).kerning(0.5)
                 .foregroundStyle(Theme.Palette.faint)
             Text("Your income").font(.ui(26, .heavy)).kerning(-0.6)
                 .foregroundStyle(Theme.Palette.ink)
@@ -178,6 +179,7 @@ private struct AddIncomeSheet: View {
                         .tint(Theme.Palette.green)
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Add income")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
