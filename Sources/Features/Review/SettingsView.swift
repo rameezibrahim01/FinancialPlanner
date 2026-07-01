@@ -12,8 +12,6 @@ struct SettingsView: View {
 
     @AppStorage("annualSavingsGoal") private var yearSavingsGoal = 0.0
 
-    @State private var remindersOn = true
-    @State private var rollOverOn = true
     @AppStorage("appLock") private var appLock = false
     @AppStorage("lockTimeout") private var lockTimeout = 0   // minutes; 0 = immediately
     @AppStorage("startingSavings") private var startingSavings = 0.0
@@ -182,8 +180,6 @@ struct SettingsView: View {
                     divider
                     valueRow("Currency", "AED", tint: Theme.Palette.greenSoft, icon: "coloncurrencysign.circle")
                     divider
-                    toggleRow("Monthly reminders", isOn: $remindersOn, tint: Theme.Palette.greenSoft2, icon: "bell")
-                    divider
                     NavigationLink {
                         BackupView()
                     } label: {
@@ -192,8 +188,6 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     divider
                     valueRow("Categories", "\(categories.count)", tint: Theme.Palette.claySoft, icon: "square.grid.2x2")
-                    divider
-                    toggleRow("Roll over balance", isOn: $rollOverOn, tint: Theme.Palette.greenSoft, icon: "arrow.triangle.2.circlepath")
                 }
             }
         }
