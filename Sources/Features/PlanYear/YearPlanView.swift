@@ -16,10 +16,19 @@ struct YearPlanView: View {
         yearSavingsGoal > 0 ? Int((totalSavings / yearSavingsGoal * 100).rounded()) : 0
     }
 
+    private var currentMonth: Int { SampleData.cal().component(.month, from: SampleData.referenceToday) }
+    private var currentYear: Int { SampleData.cal().component(.year, from: SampleData.referenceToday) }
+    private var currentMonthName: String { MonthPlan.longNames[currentMonth - 1] }
+    private var hasAnyBudget: Bool { plans.contains { $0.budgetTotal > 0 } }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.section) {
                 header
+                if !hasAnyBudget, let plan = defaultMonthPlan {
+                    NavigationLink { MonthPlanEditorView(plan: plan) } label: { setupHint }
+                        .buttonStyle(.plain)
+                }
                 summaryCard
                 tableCard
                 footer
@@ -104,6 +113,32 @@ struct YearPlanView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    // MARK: Empty-state hint (points to the current month)
+
+    private var setupHint: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(Theme.Palette.green).frame(width: 40, height: 40)
+                .overlay(Image(systemName: "wand.and.stars")
+                    .font(.system(size: 17, weight: .semibold)).foregroundStyle(.white))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Start with \(currentMonthName)")
+                    .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                Text("Set this month's budget, then copy it to the rest of the year.")
+                    .font(.ui(12)).foregroundStyle(Theme.Palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Theme.Palette.green)
+        }
+        .padding(16)
+        .background(Theme.Palette.greenSoft2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+            .stroke(Color(hex: "#cfe0d6"), lineWidth: 1))
+    }
+
     // MARK: Table
 
     private var tableCard: some View {
@@ -113,7 +148,8 @@ struct YearPlanView: View {
                 NavigationLink {
                     MonthPlanEditorView(plan: plan)
                 } label: {
-                    MonthRow(plan: plan)
+                    MonthRow(plan: plan,
+                             isCurrent: plan.month == currentMonth && plan.year == currentYear)
                 }
                 .buttonStyle(.plain)
                 if idx < plans.count - 1 {
@@ -156,7 +192,7 @@ struct YearPlanView: View {
                 NavigationLink {
                     MonthPlanEditorView(plan: plan)
                 } label: {
-                    Text("Edit a month")
+                    Text(hasAnyBudget ? "Edit a month" : "Set up \(currentMonthName)")
                         .font(.ui(16, .bold)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(16)
                         .background(Theme.Palette.green)
@@ -203,13 +239,19 @@ struct YearPlanView: View {
 
 private struct MonthRow: View {
     let plan: MonthPlan
+    var isCurrent: Bool = false
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(plan.monthShort)
-                .font(.mono(11, .medium))
-                .foregroundStyle(Theme.Palette.inkSecondary)
-                .frame(width: 38, alignment: .leading)
+            HStack(spacing: 4) {
+                if isCurrent {
+                    Circle().fill(Theme.Palette.green).frame(width: 5, height: 5)
+                }
+                Text(plan.monthShort)
+                    .font(.mono(11, isCurrent ? .bold : .medium))
+                    .foregroundStyle(isCurrent ? Theme.Palette.green : Theme.Palette.inkSecondary)
+            }
+            .frame(width: 38, alignment: .leading)
             Text(Money.thousands(plan.plannedIncome)).tabular()
                 .foregroundStyle(Theme.Palette.inkSecondary)
                 .frame(maxWidth: .infinity, alignment: .trailing)
