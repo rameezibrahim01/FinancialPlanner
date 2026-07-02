@@ -46,7 +46,7 @@ struct CategoryManagerView: View {
         .navigationTitle("Categories")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showAdd) {
-            CategoryEditorSheet(existing: nil, nameTaken: nameTaken) { name, hex in
+            CategoryEditorSheet(existing: nil, nameTaken: { nameTaken($0) }) { name, hex in
                 add(name: name, hex: hex)
             }
         }
