@@ -145,7 +145,7 @@ private struct RecurringRow: View {
     var body: some View {
         HStack(spacing: 12) {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(hex: item.tintHex))
+                .fill(Color(hex: item.colorHex).opacity(0.18))
                 .frame(width: 34, height: 34)
             VStack(alignment: .leading, spacing: 1) {
                 Text(item.name).font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
@@ -188,6 +188,9 @@ private struct RecurringEditorSheet: View {
     var onDelete: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    /// Same canonical category store the planning and expense screens use, so a
+    /// bill can only be filed under a category that actually exists elsewhere.
+    @Query(sort: \Category.order) private var categories: [Category]
     @State private var name: String
     @State private var amountText: String
     @State private var category: String
@@ -203,36 +206,25 @@ private struct RecurringEditorSheet: View {
         self.onDelete = onDelete
         _name = State(initialValue: existing?.name ?? "")
         _amountText = State(initialValue: existing.map { $0.amount > 0 ? String(Int($0.amount)) : "" } ?? "")
-        _category = State(initialValue: existing?.categoryName ?? "Housing")
+        _category = State(initialValue: existing?.categoryName ?? "")
         _cadence = State(initialValue: existing?.cadence ?? .monthly)
         _dueDay = State(initialValue: existing?.dueDay ?? 1)
         _autoPost = State(initialValue: existing?.autoPost ?? true)
     }
 
-    // name, colorHex, tintHex
-    private let baseCategories: [(String, String, String)] = [
-        ("Housing", Theme.CategoryColor.housing, "#dbeae1"),
-        ("Groceries", Theme.CategoryColor.groceries, "#e6ead7"),
-        ("Transport", Theme.CategoryColor.transport, "#dde6ea"),
-        ("Utilities", Theme.CategoryColor.utilities, "#e1e6e2"),
-        ("Health", Theme.CategoryColor.health, "#efe0e6"),
-        ("School", Theme.CategoryColor.school, "#e2e0ee"),
-        ("Subscriptions", "#8b6b3f", "#ece1d2"),
-        ("Other", Theme.CategoryColor.other, "#e6e6df"),
-    ]
-
-    /// The predefined categories, plus the item's own category if it isn't one of
-    /// them — so editing never silently changes an unusual category's color.
-    private var categories: [(String, String, String)] {
-        if let e = existing, !baseCategories.contains(where: { $0.0 == e.categoryName }) {
-            return baseCategories + [(e.categoryName, e.colorHex, e.tintHex)]
-        }
-        return baseCategories
-    }
-
     private var amount: Double { Double(amountText.filter { $0.isNumber || $0 == "." }) ?? 0 }
-    private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 && !category.isEmpty
+    }
     private var isEditing: Bool { existing != nil }
+
+    /// Keeps a valid category selected — the query is empty on the first render,
+    /// and a new bill starts with none chosen.
+    private func syncCategory() {
+        if !categories.contains(where: { $0.name == category }) {
+            category = categories.first?.name ?? ""
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -246,7 +238,7 @@ private struct RecurringEditorSheet: View {
                 }
                 Section("Details") {
                     Picker("Category", selection: $category) {
-                        ForEach(categories, id: \.0) { Text($0.0).tag($0.0) }
+                        ForEach(categories) { Text($0.name).tag($0.name) }
                     }
                     Picker("Cadence", selection: $cadence) {
                         ForEach(RecurringCadence.allCases, id: \.self) {
@@ -270,13 +262,17 @@ private struct RecurringEditorSheet: View {
             .scrollDismissesKeyboard(.immediately)
             .navigationTitle(isEditing ? "Edit recurring" : "Add recurring")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear(perform: syncCategory)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        let c = categories.first { $0.0 == category } ?? categories[0]
+                        // Accent comes from the chosen category; the row tints it
+                        // down for display, so color and tint carry the same hex.
+                        let hex = categories.first { $0.name == category }?.colorHex
+                            ?? existing?.colorHex ?? Theme.CategoryColor.other
                         onSave(RecurringFields(name: name.trimmingCharacters(in: .whitespaces),
-                                               amount: amount, category: c.0, color: c.1, tint: c.2,
+                                               amount: amount, category: category, color: hex, tint: hex,
                                                cadence: cadence, dueDay: dueDay, autoPost: autoPost))
                         dismiss()
                     }
