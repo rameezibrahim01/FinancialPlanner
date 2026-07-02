@@ -187,7 +187,12 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     divider
-                    valueRow("Categories", "\(categories.count)", tint: Theme.Palette.claySoft, icon: "square.grid.2x2")
+                    NavigationLink {
+                        CategoryManagerView()
+                    } label: {
+                        valueRow("Categories", "\(categories.count)", tint: Theme.Palette.claySoft, icon: "square.grid.2x2")
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

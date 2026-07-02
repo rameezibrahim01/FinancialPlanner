@@ -37,6 +37,7 @@ enum SampleData {
         ("Utilities", Theme.CategoryColor.utilities),
         ("Health", Theme.CategoryColor.health),
         ("School", Theme.CategoryColor.school),
+        ("Subscriptions", Theme.CategoryColor.subscriptions),
         ("Other", Theme.CategoryColor.other),
     ]
 
