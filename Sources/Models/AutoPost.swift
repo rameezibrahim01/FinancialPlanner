@@ -34,7 +34,7 @@ enum AutoPost {
             let dueDay = min(r.dueDay, daysInMonth)
             context.insert(Transaction(type: .expense, amount: r.amount, categoryName: r.categoryName,
                                        date: SampleData.date(year, month, dueDay),
-                                       note: r.name, autoPosted: true))
+                                       note: r.name, autoPosted: true, recurringID: r.id))
             r.lastPostedPeriod = period
         }
 
