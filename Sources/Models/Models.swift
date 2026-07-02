@@ -104,9 +104,12 @@ final class Transaction {
     var note: String
     /// True when created automatically from an income source / recurring bill.
     var autoPosted: Bool = false
+    /// Links an auto-posted transaction back to the recurring bill that created
+    /// it (nil otherwise), so edits/deletes to the bill can find its posted entry.
+    var recurringID: UUID? = nil
 
     init(type: TxType, amount: Double, categoryName: String, date: Date, note: String = "",
-         autoPosted: Bool = false) {
+         autoPosted: Bool = false, recurringID: UUID? = nil) {
         self.id = UUID()
         self.typeRaw = type.rawValue
         self.amount = amount
@@ -114,6 +117,7 @@ final class Transaction {
         self.date = date
         self.note = note
         self.autoPosted = autoPosted
+        self.recurringID = recurringID
     }
 
     var type: TxType { TxType(rawValue: typeRaw) ?? .expense }

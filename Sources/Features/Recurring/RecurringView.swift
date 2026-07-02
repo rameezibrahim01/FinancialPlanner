@@ -43,6 +43,7 @@ struct RecurringView: View {
         }
         .sheet(item: $editingItem) { item in
             RecurringEditorSheet(existing: item, onSave: { fields in
+                let oldName = item.name
                 item.name = fields.name
                 item.amount = fields.amount
                 item.categoryName = fields.category
@@ -51,12 +52,54 @@ struct RecurringView: View {
                 item.cadenceRaw = fields.cadence.rawValue
                 item.dueDay = fields.dueDay
                 item.autoPost = fields.autoPost
+                syncPostedThisMonth(for: item, oldName: oldName)
                 try? context.save()
+                // Covers the case where it hadn't posted yet (future due day, or
+                // auto-post just enabled); the period guard prevents duplicates.
                 AutoPost.run(context)
             }, onDelete: {
+                deletePosted(for: item)
                 context.delete(item)
                 try? context.save()
             })
+        }
+    }
+
+    // MARK: Keeping posted transactions in sync with the bill
+
+    /// This month's auto-posted transactions belonging to `item` — matched by the
+    /// link, or (for entries posted before the link existed) by the old name.
+    private func postedThisMonth(for item: Recurring, oldName: String) -> [Transaction] {
+        let cal = SampleData.cal()
+        let today = SampleData.referenceToday
+        let start = SampleData.date(cal.component(.year, from: today),
+                                    cal.component(.month, from: today), 1)
+        let end = cal.date(byAdding: .month, value: 1, to: start) ?? start
+        let all = (try? context.fetch(FetchDescriptor<Transaction>())) ?? []
+        return all.filter {
+            $0.autoPosted && $0.date >= start && $0.date < end
+                && ($0.recurringID == item.id || ($0.recurringID == nil && $0.note == oldName))
+        }
+    }
+
+    /// Updates the current month's posted entry to match the edited bill (and
+    /// back-fills the link so it's found directly next time).
+    private func syncPostedThisMonth(for item: Recurring, oldName: String) {
+        for t in postedThisMonth(for: item, oldName: oldName) {
+            t.amount = item.amount
+            t.categoryName = item.categoryName
+            t.note = item.name
+            t.recurringID = item.id
+        }
+    }
+
+    /// Removes every auto-posted transaction created by a bill that's being
+    /// deleted, so it disappears completely.
+    private func deletePosted(for item: Recurring) {
+        let all = (try? context.fetch(FetchDescriptor<Transaction>())) ?? []
+        for t in all where t.autoPosted
+            && (t.recurringID == item.id || (t.recurringID == nil && t.note == item.name)) {
+            context.delete(t)
         }
     }
 
