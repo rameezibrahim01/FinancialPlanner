@@ -8,6 +8,7 @@ struct RecurringView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Recurring.order) private var items: [Recurring]
     @State private var showAdd = false
+    @State private var editingItem: Recurring?
 
     private var monthlyTotal: Double { items.reduce(0) { $0 + $1.monthlyEquivalent } }
     private var annualCommitted: Double { monthlyTotal * 12 }
@@ -28,13 +29,34 @@ struct RecurringView: View {
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showAdd) {
-            AddRecurringSheet { name, amount, cat, color, tint, cadence, dueDay, autoPost in
+            RecurringEditorSheet(existing: nil) { fields in
                 let order = (items.map(\.order).max() ?? -1) + 1
-                context.insert(Recurring(name: name, amount: amount, categoryName: cat,
-                                         colorHex: color, tintHex: tint, cadence: cadence,
-                                         dueDay: dueDay, autoPost: autoPost, order: order))
+                context.insert(Recurring(name: fields.name, amount: fields.amount,
+                                         categoryName: fields.category, colorHex: fields.color,
+                                         tintHex: fields.tint, cadence: fields.cadence,
+                                         dueDay: fields.dueDay, autoPost: fields.autoPost, order: order))
                 try? context.save()
+                // Post it immediately if it's already due this month — otherwise it
+                // wouldn't appear until the next app launch.
+                AutoPost.run(context)
             }
+        }
+        .sheet(item: $editingItem) { item in
+            RecurringEditorSheet(existing: item, onSave: { fields in
+                item.name = fields.name
+                item.amount = fields.amount
+                item.categoryName = fields.category
+                item.colorHex = fields.color
+                item.tintHex = fields.tint
+                item.cadenceRaw = fields.cadence.rawValue
+                item.dueDay = fields.dueDay
+                item.autoPost = fields.autoPost
+                try? context.save()
+                AutoPost.run(context)
+            }, onDelete: {
+                context.delete(item)
+                try? context.save()
+            })
         }
     }
 
@@ -85,7 +107,7 @@ struct RecurringView: View {
         HStack {
             Text("Bills & subscriptions").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
             Spacer()
-            Text("DUE DATE").font(.mono(10, .medium)).kerning(0.4).foregroundStyle(Theme.Palette.faint)
+            Text("TAP TO EDIT").font(.mono(10, .medium)).kerning(0.4).foregroundStyle(Theme.Palette.faint)
         }
         .padding(.horizontal, 4)
     }
@@ -99,7 +121,12 @@ struct RecurringView: View {
                         .frame(maxWidth: .infinity, alignment: .leading).padding(12)
                 }
                 ForEach(Array(items.enumerated()), id: \.element.persistentModelID) { idx, r in
-                    RecurringRow(item: r)
+                    Button {
+                        editingItem = r
+                    } label: {
+                        RecurringRow(item: r)
+                    }
+                    .buttonStyle(.plain)
                     if idx < items.count - 1 {
                         Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
                             .padding(.leading, 46)
@@ -131,27 +158,59 @@ private struct RecurringRow: View {
                     .font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
                 Text(item.dueLabel).font(.ui(10, .semibold)).foregroundStyle(Theme.Palette.green)
             }
+            Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color(hex: "#cdd2cb"))
         }
         .padding(.vertical, 10).padding(.horizontal, 11)
+        .contentShape(Rectangle())
     }
 }
 
-// MARK: - Add recurring sheet
+// MARK: - Add / edit recurring sheet
 
-private struct AddRecurringSheet: View {
-    /// (name, amount, category, colorHex, tintHex, cadence, dueDay, autoPost)
-    var onSave: (String, Double, String, String, String, RecurringCadence, Int, Bool) -> Void
+/// The values collected by the editor, handed back to the caller to insert or
+/// apply to an existing item.
+struct RecurringFields {
+    var name: String
+    var amount: Double
+    var category: String
+    var color: String
+    var tint: String
+    var cadence: RecurringCadence
+    var dueDay: Int
+    var autoPost: Bool
+}
+
+private struct RecurringEditorSheet: View {
+    /// Existing item to edit, or nil to add a new one.
+    let existing: Recurring?
+    var onSave: (RecurringFields) -> Void
+    var onDelete: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var amountText = ""
-    @State private var category = "Housing"
-    @State private var cadence: RecurringCadence = .monthly
-    @State private var dueDay = 1
-    @State private var autoPost = true
+    @State private var name: String
+    @State private var amountText: String
+    @State private var category: String
+    @State private var cadence: RecurringCadence
+    @State private var dueDay: Int
+    @State private var autoPost: Bool
+
+    init(existing: Recurring?,
+         onSave: @escaping (RecurringFields) -> Void,
+         onDelete: (() -> Void)? = nil) {
+        self.existing = existing
+        self.onSave = onSave
+        self.onDelete = onDelete
+        _name = State(initialValue: existing?.name ?? "")
+        _amountText = State(initialValue: existing.map { $0.amount > 0 ? String(Int($0.amount)) : "" } ?? "")
+        _category = State(initialValue: existing?.categoryName ?? "Housing")
+        _cadence = State(initialValue: existing?.cadence ?? .monthly)
+        _dueDay = State(initialValue: existing?.dueDay ?? 1)
+        _autoPost = State(initialValue: existing?.autoPost ?? true)
+    }
 
     // name, colorHex, tintHex
-    private let categories: [(String, String, String)] = [
+    private let baseCategories: [(String, String, String)] = [
         ("Housing", Theme.CategoryColor.housing, "#dbeae1"),
         ("Groceries", Theme.CategoryColor.groceries, "#e6ead7"),
         ("Transport", Theme.CategoryColor.transport, "#dde6ea"),
@@ -162,8 +221,18 @@ private struct AddRecurringSheet: View {
         ("Other", Theme.CategoryColor.other, "#e6e6df"),
     ]
 
-    private var amount: Double { Double(amountText) ?? 0 }
+    /// The predefined categories, plus the item's own category if it isn't one of
+    /// them — so editing never silently changes an unusual category's color.
+    private var categories: [(String, String, String)] {
+        if let e = existing, !baseCategories.contains(where: { $0.0 == e.categoryName }) {
+            return baseCategories + [(e.categoryName, e.colorHex, e.tintHex)]
+        }
+        return baseCategories
+    }
+
+    private var amount: Double { Double(amountText.filter { $0.isNumber || $0 == "." }) ?? 0 }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
+    private var isEditing: Bool { existing != nil }
 
     var body: some View {
         NavigationStack {
@@ -187,17 +256,28 @@ private struct AddRecurringSheet: View {
                     Stepper("Due day: \(Recurring.ordinal(dueDay))", value: $dueDay, in: 1...28)
                     Toggle("Auto-post each month", isOn: $autoPost).tint(Theme.Palette.green)
                 }
+                if isEditing, let onDelete {
+                    Section {
+                        Button(role: .destructive) {
+                            onDelete()
+                            dismiss()
+                        } label: {
+                            Text("Delete bill").frame(maxWidth: .infinity)
+                        }
+                    }
+                }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("Add recurring")
+            .navigationTitle(isEditing ? "Edit recurring" : "Add recurring")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         let c = categories.first { $0.0 == category } ?? categories[0]
-                        onSave(name.trimmingCharacters(in: .whitespaces), amount,
-                               c.0, c.1, c.2, cadence, dueDay, autoPost)
+                        onSave(RecurringFields(name: name.trimmingCharacters(in: .whitespaces),
+                                               amount: amount, category: c.0, color: c.1, tint: c.2,
+                                               cadence: cadence, dueDay: dueDay, autoPost: autoPost))
                         dismiss()
                     }
                     .fontWeight(.bold).disabled(!canSave)
