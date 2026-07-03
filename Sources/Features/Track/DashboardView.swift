@@ -43,42 +43,55 @@ struct DashboardView: View {
     private var monthExpense: Double { monthTxns.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount } }
     private var saved: Double { monthIncome - monthExpense }
 
-    /// Recurring charges still to post this month (due day not yet passed).
-    private var committedRemaining: Double {
-        recurring.filter { $0.dueDay >= todayDay }.reduce(0) { $0 + $1.amount }
+    // MARK: Safe-to-spend (discretionary model)
+    //
+    // Fixed recurring bills (rent, subscriptions) are reserved for the whole
+    // month up front and excluded from the daily "safe to spend" — otherwise the
+    // day a big bill auto-posts, it lands as "spent today" and zeroes the number.
+    // Safe-to-spend is purely *discretionary* money: the budget left after bills,
+    // spread over the remaining days.
+
+    /// Fixed monthly bills that post automatically — reserved for the month.
+    private var committedTotal: Double {
+        recurring.filter { $0.autoPost && $0.cadence == .monthly }.reduce(0) { $0 + $1.amount }
     }
-    private var safeBase: Double { monthBudget - committedRemaining - monthExpense }
-    private var leftThisMonth: Double { monthBudget - monthExpense }
-    private var spentFraction: Double { monthBudget > 0 ? min(1, monthExpense / monthBudget) : 0 }
-    private var onPlan: Bool { monthExpense <= monthBudget }
+    /// Budget available for day-to-day variable spending, after reserving bills.
+    private var discretionaryBudget: Double { max(0, monthBudget - committedTotal) }
 
-    /// The month's budget is exhausted (committed + spent exceed it).
-    private var isOver: Bool { safeBase < 0 }
-    private var overAmount: Double { max(0, -safeBase) }
-
-    /// Spent so far today, and everything spent earlier this month.
+    /// Variable (non-auto-posted) expenses this month, all-time / today / earlier.
+    private var discretionaryTxns: [Transaction] {
+        monthTxns.filter { $0.type == .expense && !$0.autoPosted }
+    }
+    private var discretionarySpent: Double { discretionaryTxns.reduce(0) { $0 + $1.amount } }
     private var spentToday: Double {
-        txns.filter { $0.type == .expense && cal.isDate($0.date, inSameDayAs: today) }
-            .reduce(0) { $0 + $1.amount }
+        discretionaryTxns.filter { cal.isDate($0.date, inSameDayAs: today) }.reduce(0) { $0 + $1.amount }
     }
-    private var expenseBeforeToday: Double { monthExpense - spentToday }
-    /// Today's slice of the remaining plan — budget minus still-to-post
-    /// commitments and everything spent before today, spread over days left.
+    private var discretionaryBeforeToday: Double { discretionarySpent - spentToday }
+
+    private var discretionaryLeft: Double { discretionaryBudget - discretionarySpent }
+    private var leftThisMonth: Double { discretionaryLeft }
+    private var spentFraction: Double {
+        discretionaryBudget > 0 ? min(1, discretionarySpent / discretionaryBudget) : 0
+    }
+    private var onPlan: Bool { discretionarySpent <= discretionaryBudget }
+
+    /// The discretionary budget is exhausted.
+    private var isOver: Bool { discretionaryLeft < 0 }
+    private var overAmount: Double { max(0, -discretionaryLeft) }
+
+    /// Today's slice of the remaining discretionary budget, spread over days left.
     private var todayAllowance: Double {
-        max(0, (monthBudget - committedRemaining - expenseBeforeToday) / Double(daysRemaining))
+        max(0, (discretionaryBudget - discretionaryBeforeToday) / Double(daysRemaining))
     }
     /// Headline: what's left of today's allowance after today's spend.
     private var safeToday: Double { max(0, todayAllowance - spentToday) }
-    private var todaySpentFraction: Double {
-        todayAllowance > 0 ? min(1, spentToday / todayAllowance) : (spentToday > 0 ? 1 : 0)
-    }
 
     /// Pace: how far through the month we are, and whether spending is ahead of it.
     private var monthElapsed: Double { min(1, Double(todayDay) / Double(daysInMonth)) }
-    private var aheadOfPace: Bool { monthBudget > 0 && spentFraction > monthElapsed + 0.02 }
+    private var aheadOfPace: Bool { discretionaryBudget > 0 && spentFraction > monthElapsed + 0.02 }
     private var paceCaption: String {
         if isOver { return "Over your plan" }
-        if monthBudget <= 0 { return "No budget set" }
+        if discretionaryBudget <= 0 { return "No budget set" }
         return aheadOfPace ? "Ahead of pace" : "On pace"
     }
 
@@ -343,13 +356,19 @@ struct DashboardView: View {
 
             HStack {
                 Text(isOver
-                     ? "Spent \(Money.aed(monthExpense)) of \(Money.plain(monthBudget))"
+                     ? "Spent \(Money.aed(discretionarySpent)) of \(Money.plain(discretionaryBudget))"
                      : "Spent today \(Money.aed(spentToday)) of \(Money.plain(todayAllowance))")
                 Spacer()
-                Text("\(Money.aed(leftThisMonth)) left")
+                Text("\(Money.aed(discretionaryLeft)) left")
             }
             .font(.ui(12)).foregroundStyle(heroSubtle)
             .padding(.top, 4)
+
+            if committedTotal > 0 {
+                Text("\(Money.aed(committedTotal)) in bills set aside for the month")
+                    .font(.ui(11)).foregroundStyle(heroSubtle)
+                    .padding(.top, 3)
+            }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
