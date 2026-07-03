@@ -3,18 +3,9 @@ import SwiftData
 
 @main
 struct FinancialPlannerApp: App {
-    let container: ModelContainer
+    let container = AppModelContainer.shared
 
     init() {
-        do {
-            container = try ModelContainer(
-                for: Category.self, IncomeSource.self, CategoryBudget.self,
-                MonthPlan.self, Transaction.self, Goal.self,
-                Recurring.self, Debt.self
-            )
-        } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
-        }
         SampleData.seedIfNeeded(container.mainContext)
     }
 
