@@ -1,13 +1,17 @@
 import SwiftUI
 import SwiftData
 
-/// C3 · Add transaction — enter a new income/expense. Segmented Expense|Income
-/// control recolors the amount; category is single-select; the custom numeric
-/// keypad edits the amount. Save persists a Transaction and dismisses.
+/// C3 · Add / edit transaction — enter or amend an income/expense. Segmented
+/// Expense|Income control recolors the amount; category is single-select; the
+/// custom numeric keypad edits the amount. Save persists the transaction; in
+/// edit mode a Delete action removes it.
 struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query(sort: \Category.order) private var categories: [Category]
+
+    /// The transaction being edited, or nil to create a new one.
+    let editing: Transaction?
 
     @State private var type: TxType = .expense
     @State private var amountString = "0"
@@ -15,6 +19,17 @@ struct AddTransactionView: View {
     @State private var note = ""
     @State private var caretOn = true
     @FocusState private var noteFocused: Bool
+
+    init(editing: Transaction? = nil) {
+        self.editing = editing
+        _type = State(initialValue: editing?.type ?? .expense)
+        if let e = editing {
+            _amountString = State(initialValue: e.amount == e.amount.rounded()
+                                  ? String(Int(e.amount)) : String(e.amount))
+        }
+        _selectedCategory = State(initialValue: editing?.categoryName ?? "")
+        _note = State(initialValue: editing?.note ?? "")
+    }
 
     private var accent: Color { type == .income ? Theme.Palette.green : Theme.Palette.clay }
     private var amount: Double { Double(amountString) ?? 0 }
@@ -30,12 +45,21 @@ struct AddTransactionView: View {
     /// Chips depend on the entry type: real categories for expenses, a small
     /// income set otherwise.
     private var chips: [(name: String, colorHex: String)] {
+        var base: [(name: String, colorHex: String)]
         if type == .income {
-            return [("Salary", Theme.CategoryColor.housing),
+            base = [("Salary", Theme.CategoryColor.housing),
                     ("Freelance", Theme.CategoryColor.groceries),
                     ("Other", Theme.CategoryColor.other)]
+        } else {
+            base = categories.map { ($0.name, $0.colorHex) }
         }
-        return categories.map { ($0.name, $0.colorHex) }
+        // When editing, keep the transaction's own category available even if it
+        // isn't one of the current chips (e.g. a since-deleted category).
+        if let e = editing, e.type == type, !base.contains(where: { $0.name == e.categoryName }) {
+            let hex = categories.first { $0.name == e.categoryName }?.colorHex ?? Theme.CategoryColor.other
+            base.append((e.categoryName, hex))
+        }
+        return base
     }
 
     private let keys = ["1","2","3","4","5","6","7","8","9",".","0","⌫"]
@@ -50,6 +74,16 @@ struct AddTransactionView: View {
                     amountDisplay
                     chipGrid
                     detailRows
+                    if editing != nil {
+                        Button(role: .destructive, action: delete) {
+                            Text("Delete transaction")
+                                .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.clay)
+                                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                                .background(Theme.Palette.claySoft)
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(.horizontal, Theme.Spacing.side)
                 .padding(.top, 8)
@@ -90,7 +124,7 @@ struct AddTransactionView: View {
             Button("Cancel") { dismiss() }
                 .font(.ui(15)).foregroundStyle(Theme.Palette.muted)
             Spacer()
-            Text("Add").font(.ui(17, .bold)).foregroundStyle(Theme.Palette.ink)
+            Text(editing == nil ? "Add" : "Edit").font(.ui(17, .bold)).foregroundStyle(Theme.Palette.ink)
             Spacer()
             Button("Save", action: save)
                 .font(.ui(15, .bold))
@@ -196,7 +230,8 @@ struct AddTransactionView: View {
                 HStack {
                     Text("Date").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
                     Spacer()
-                    Text("Today · \(todayLabel)").font(.ui(13, .semibold)).foregroundStyle(Theme.Palette.ink)
+                    Text(editing == nil ? "Today · \(dateLabel)" : dateLabel)
+                        .font(.ui(13, .semibold)).foregroundStyle(Theme.Palette.ink)
                 }
                 .padding(12)
                 Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
@@ -216,11 +251,11 @@ struct AddTransactionView: View {
         }
     }
 
-    private var todayLabel: String {
+    private var dateLabel: String {
         let f = DateFormatter()
         f.calendar = SampleData.cal()
         f.dateFormat = "MMM d"
-        return f.string(from: Date())
+        return f.string(from: editing?.date ?? Date())
     }
 
     // MARK: Keypad
@@ -281,10 +316,27 @@ struct AddTransactionView: View {
 
     private func save() {
         guard canSave else { return }
-        let txn = Transaction(type: type, amount: amount, categoryName: effectiveCategory,
-                              date: Date(), note: note.trimmingCharacters(in: .whitespaces))
-        context.insert(txn)
+        let cleanNote = note.trimmingCharacters(in: .whitespaces)
+        if let e = editing {
+            // Amend in place — keeps the original date, autoPosted flag and
+            // recurring link.
+            e.typeRaw = type.rawValue
+            e.amount = amount
+            e.categoryName = effectiveCategory
+            e.note = cleanNote
+        } else {
+            context.insert(Transaction(type: type, amount: amount, categoryName: effectiveCategory,
+                                       date: Date(), note: cleanNote))
+        }
         try? context.save()
+        dismiss()
+    }
+
+    private func delete() {
+        if let e = editing {
+            context.delete(e)
+            try? context.save()
+        }
         dismiss()
     }
 }
