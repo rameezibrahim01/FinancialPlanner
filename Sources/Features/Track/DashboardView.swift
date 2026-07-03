@@ -11,6 +11,7 @@ struct DashboardView: View {
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Recurring.order) private var recurring: [Recurring]
+    @Query(sort: \Category.order) private var categories: [Category]
 
     @State private var mode: Mode = .today
     @State private var showAdd = false
@@ -94,6 +95,31 @@ struct DashboardView: View {
         switch n { case 0: return "today"; case 1: return "tomorrow"; default: return "in \(n) days" }
     }
 
+    // MARK: Empty state & recent activity
+
+    /// No budget planned for this month yet — the safe-to-spend math is
+    /// meaningless, so we show a setup nudge instead of a wall of zeros.
+    private var needsBudget: Bool { monthBudget <= 0 }
+
+    /// The five most recent transactions, newest first.
+    private var recentTxns: [Transaction] {
+        Array(txns.sorted { $0.date > $1.date }.prefix(5))
+    }
+
+    /// Accent color for a transaction's category (falls back to a neutral gray).
+    private func color(for name: String) -> String {
+        if let c = categories.first(where: { $0.name == name }) { return c.colorHex }
+        if name == "Salary" { return Theme.CategoryColor.housing }
+        return Theme.CategoryColor.other
+    }
+
+    private func dayLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.calendar = cal
+        f.dateFormat = "d MMM"
+        return f.string(from: date)
+    }
+
     // MARK: Year view (12-month grid)
 
     private struct MonthActual {
@@ -141,10 +167,18 @@ struct DashboardView: View {
                 .pickerStyle(.segmented)
 
                 if mode == .today {
-                    safeToSpendCard
-                    logButton
-                    statTiles
-                    upcomingSection
+                    if needsBudget {
+                        setupHint
+                        logButton
+                    } else {
+                        safeToSpendCard
+                        logButton
+                        statTiles
+                        upcomingSection
+                    }
+                    if !recentTxns.isEmpty {
+                        recentSection
+                    }
                 } else {
                     yearNetCard
                     glance
@@ -175,12 +209,96 @@ struct DashboardView: View {
                     .foregroundStyle(Theme.Palette.ink)
             }
             Spacer()
-            Pill(text: onPlan ? "On plan" : "Off plan",
-                 bg: onPlan ? Theme.Palette.greenSoft : Theme.Palette.claySoft,
-                 fg: onPlan ? Theme.Palette.green : Theme.Palette.clay,
-                 dot: onPlan ? Theme.Palette.green : Theme.Palette.clay)
+            if !needsBudget {
+                Pill(text: onPlan ? "On plan" : "Off plan",
+                     bg: onPlan ? Theme.Palette.greenSoft : Theme.Palette.claySoft,
+                     fg: onPlan ? Theme.Palette.green : Theme.Palette.clay,
+                     dot: onPlan ? Theme.Palette.green : Theme.Palette.clay)
+            }
         }
         .padding(.horizontal, 4)
+    }
+
+    // MARK: Empty-state setup hint
+
+    private var setupHint: some View {
+        Group {
+            if let plan = monthPlan {
+                NavigationLink {
+                    MonthPlanEditorView(plan: plan)
+                } label: { setupHintCard }
+                .buttonStyle(.plain)
+            } else {
+                setupHintCard
+            }
+        }
+    }
+
+    private var setupHintCard: some View {
+        HStack(spacing: 14) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Theme.Palette.green).frame(width: 44, height: 44)
+                .overlay(Image(systemName: "wand.and.stars")
+                    .font(.system(size: 19, weight: .semibold)).foregroundStyle(.white))
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Set up \(MonthPlan.longNames[curMonth - 1])")
+                    .font(.ui(16, .bold)).foregroundStyle(Theme.Palette.ink)
+                Text("Add this month's income and budget to unlock your daily safe-to-spend.")
+                    .font(.ui(12)).foregroundStyle(Theme.Palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.Palette.green)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity)
+        .background(Theme.Palette.greenSoft2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.largeSummary, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.largeSummary, style: .continuous)
+            .stroke(Color(hex: "#cfe0d6"), lineWidth: 1))
+    }
+
+    // MARK: Recent activity
+
+    private var recentSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Recent activity")
+                .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                .padding(.horizontal, 4)
+            Card(padding: 4) {
+                VStack(spacing: 0) {
+                    ForEach(Array(recentTxns.enumerated()), id: \.element.persistentModelID) { idx, t in
+                        recentRow(t)
+                        if idx < recentTxns.count - 1 {
+                            Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
+                                .padding(.leading, 44)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func recentRow(_ t: Transaction) -> some View {
+        let income = t.type == .income
+        return HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(Color(hex: color(for: t.categoryName)).opacity(0.18))
+                .frame(width: 32, height: 32)
+                .overlay(Circle().fill(Color(hex: color(for: t.categoryName))).frame(width: 9, height: 9))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(t.note.isEmpty ? t.categoryName : t.note)
+                    .font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink).lineLimit(1)
+                Text("\(dayLabel(t.date)) · \(t.categoryName)")
+                    .font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+            }
+            Spacer()
+            Text("\(income ? "+" : "−")\(Money.plain(t.amount))").tabular()
+                .font(.ui(14, .bold))
+                .foregroundStyle(income ? Theme.Palette.green : Theme.Palette.clay)
+        }
+        .padding(.vertical, 11).padding(.horizontal, 11)
     }
 
     // MARK: Safe to spend hero
