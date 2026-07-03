@@ -95,6 +95,27 @@ struct DashboardView: View {
         return aheadOfPace ? "Ahead of pace" : "On pace"
     }
 
+    /// A one-line, plain-language read on the current pace.
+    private var insightWarning: Bool { isOver || aheadOfPace }
+    private var insightText: String {
+        if isOver {
+            return "You're \(Money.aed(overAmount)) over your discretionary budget — ease off to recover."
+        }
+        let perDay = Money.aed(todayAllowance)
+        if aheadOfPace {
+            return "Spending ahead of pace — about \(perDay)/day keeps you on plan."
+        }
+        return "Nicely paced — about \(perDay)/day keeps you on plan."
+    }
+
+    /// Header eyebrow: weekday + date, e.g. "THU, 3 JUL · AED".
+    private var dateEyebrow: String {
+        let f = DateFormatter()
+        f.calendar = cal
+        f.dateFormat = "EEE, d MMM"
+        return "\(f.string(from: today).uppercased()) · AED"
+    }
+
     // MARK: Upcoming recurring
 
     private func daysUntil(_ dueDay: Int) -> Int {
@@ -185,6 +206,7 @@ struct DashboardView: View {
                         logButton
                     } else {
                         safeToSpendCard
+                        insightCard
                         logButton
                         statTiles
                         upcomingSection
@@ -214,7 +236,7 @@ struct DashboardView: View {
     private var header: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("\(MonthPlan.longNames[curMonth - 1].uppercased()) · AED")
+                Text(dateEyebrow)
                     .font(.mono(11, .medium)).kerning(0.5)
                     .foregroundStyle(Theme.Palette.muted)
                 Text(displayName.isEmpty ? "Welcome back" : "Hello, \(displayName)")
@@ -403,13 +425,49 @@ struct DashboardView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: Insight
+
+    private var insightCard: some View {
+        HStack(spacing: 10) {
+            Image(systemName: insightWarning ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(isOver ? Theme.Palette.clay
+                                 : (aheadOfPace ? Theme.Palette.amber : Theme.Palette.green))
+            Text(insightText)
+                .font(.ui(12, .medium)).foregroundStyle(Theme.Palette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 11).padding(.horizontal, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(insightBg)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private var insightBg: Color {
+        if isOver { return Theme.Palette.claySoft }
+        if aheadOfPace { return Color(hex: "#f4ecd9") }
+        return Theme.Palette.greenSoft2
+    }
+
     // MARK: Stat tiles
 
     private var statTiles: some View {
         HStack(spacing: 9) {
-            statTile("Income", monthIncome, Theme.Palette.ink)
-            statTile("Spent", monthExpense, Theme.Palette.clay)
-            statTile("Saved", saved, Theme.Palette.green)
+            tileLink("Income", monthIncome, Theme.Palette.ink)
+            tileLink("Spent", monthExpense, Theme.Palette.clay)
+            tileLink("Saved", saved, Theme.Palette.green)
+        }
+    }
+
+    /// A stat tile that drills into this month's breakdown.
+    @ViewBuilder
+    private func tileLink(_ label: String, _ value: Double, _ color: Color) -> some View {
+        if let plan = monthPlan {
+            NavigationLink { MonthlyBreakdownView(plan: plan) } label: { statTile(label, value, color) }
+                .buttonStyle(.plain)
+        } else {
+            statTile(label, value, color)
         }
     }
 
