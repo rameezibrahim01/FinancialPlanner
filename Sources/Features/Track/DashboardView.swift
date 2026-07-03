@@ -13,6 +13,7 @@ struct DashboardView: View {
     @Query(sort: \Recurring.order) private var recurring: [Recurring]
 
     @State private var mode: Mode = .today
+    @State private var showAdd = false
     enum Mode: String, CaseIterable, Identifiable {
         case today = "Today", year = "Year"
         var id: String { rawValue }
@@ -46,11 +47,39 @@ struct DashboardView: View {
         recurring.filter { $0.dueDay >= todayDay }.reduce(0) { $0 + $1.amount }
     }
     private var safeBase: Double { monthBudget - committedRemaining - monthExpense }
-    private var safeToday: Double { max(0, safeBase / Double(daysRemaining)) }
-    private var isOver: Bool { safeBase < 0 }
     private var leftThisMonth: Double { monthBudget - monthExpense }
     private var spentFraction: Double { monthBudget > 0 ? min(1, monthExpense / monthBudget) : 0 }
     private var onPlan: Bool { monthExpense <= monthBudget }
+
+    /// The month's budget is exhausted (committed + spent exceed it).
+    private var isOver: Bool { safeBase < 0 }
+    private var overAmount: Double { max(0, -safeBase) }
+
+    /// Spent so far today, and everything spent earlier this month.
+    private var spentToday: Double {
+        txns.filter { $0.type == .expense && cal.isDate($0.date, inSameDayAs: today) }
+            .reduce(0) { $0 + $1.amount }
+    }
+    private var expenseBeforeToday: Double { monthExpense - spentToday }
+    /// Today's slice of the remaining plan — budget minus still-to-post
+    /// commitments and everything spent before today, spread over days left.
+    private var todayAllowance: Double {
+        max(0, (monthBudget - committedRemaining - expenseBeforeToday) / Double(daysRemaining))
+    }
+    /// Headline: what's left of today's allowance after today's spend.
+    private var safeToday: Double { max(0, todayAllowance - spentToday) }
+    private var todaySpentFraction: Double {
+        todayAllowance > 0 ? min(1, spentToday / todayAllowance) : (spentToday > 0 ? 1 : 0)
+    }
+
+    /// Pace: how far through the month we are, and whether spending is ahead of it.
+    private var monthElapsed: Double { min(1, Double(todayDay) / Double(daysInMonth)) }
+    private var aheadOfPace: Bool { monthBudget > 0 && spentFraction > monthElapsed + 0.02 }
+    private var paceCaption: String {
+        if isOver { return "Over your plan" }
+        if monthBudget <= 0 { return "No budget set" }
+        return aheadOfPace ? "Ahead of pace" : "On pace"
+    }
 
     // MARK: Upcoming recurring
 
@@ -113,6 +142,7 @@ struct DashboardView: View {
 
                 if mode == .today {
                     safeToSpendCard
+                    logButton
                     statTiles
                     upcomingSection
                 } else {
@@ -127,6 +157,9 @@ struct DashboardView: View {
         }
         .screenBackground()
         .navBarHiddenInCompact()
+        .sheet(isPresented: $showAdd) {
+            AddTransactionView()
+        }
     }
 
     // MARK: Header
@@ -152,40 +185,85 @@ struct DashboardView: View {
 
     // MARK: Safe to spend hero
 
+    private var heroSubtle: Color { isOver ? Color.white.opacity(0.82) : Theme.Palette.greenOnDark }
+
     private var safeToSpendCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Safe to spend today")
-                .font(.ui(13)).foregroundStyle(Theme.Palette.greenOnDark)
+            Text(isOver ? "Over budget this month" : "Safe to spend today")
+                .font(.ui(13)).foregroundStyle(heroSubtle)
             HStack(alignment: .firstTextBaseline, spacing: 7) {
-                Text("AED").font(.ui(16, .semibold)).foregroundStyle(Theme.Palette.greenOnDark)
-                Text(Money.plain(safeToday)).tabular()
+                Text("AED").font(.ui(16, .semibold)).foregroundStyle(heroSubtle)
+                Text(Money.plain(isOver ? overAmount : safeToday)).tabular()
                     .font(.ui(46, .heavy)).kerning(-1.4).foregroundStyle(.white)
             }
             .padding(.top, 5)
 
+            // Pace meter: budget used (fill) vs month elapsed (tick).
             GeometryReader { geo in
+                let w = geo.size.width
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.white.opacity(0.18))
-                    Capsule().fill(isOver ? Theme.Palette.amber : Theme.Palette.greenAccent)
-                        .frame(width: max(0, min(1, spentFraction)) * geo.size.width)
+                    Capsule().fill(barFill)
+                        .frame(width: max(0, min(1, spentFraction)) * w)
+                    if monthBudget > 0 {
+                        Rectangle().fill(Color.white.opacity(0.7))
+                            .frame(width: 2, height: 8)
+                            .offset(x: min(1, monthElapsed) * w - 1)
+                    }
                 }
             }
             .frame(height: 8)
             .padding(.top, 14)
 
             HStack {
-                Text("\(Money.aed(leftThisMonth)) left this month")
+                Text(paceCaption)
                 Spacer()
                 Text("\(daysRemaining) \(daysRemaining == 1 ? "day" : "days") to go")
             }
-            .font(.ui(12)).foregroundStyle(Theme.Palette.greenOnDark)
+            .font(.ui(12, .semibold)).foregroundStyle(heroSubtle)
             .padding(.top, 9)
+
+            HStack {
+                Text(isOver
+                     ? "Spent \(Money.aed(monthExpense)) of \(Money.plain(monthBudget))"
+                     : "Spent today \(Money.aed(spentToday)) of \(Money.plain(todayAllowance))")
+                Spacer()
+                Text("\(Money.aed(leftThisMonth)) left")
+            }
+            .font(.ui(12)).foregroundStyle(heroSubtle)
+            .padding(.top, 4)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Palette.green)
+        .background(isOver ? Theme.Palette.clay : Theme.Palette.green)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.largeSummary, style: .continuous))
-        .appShadow(.greenCard)
+        .appShadow(isOver ? .card : .greenCard)
+    }
+
+    /// Fill color for the pace meter: white when over, amber when ahead of pace,
+    /// green otherwise.
+    private var barFill: Color {
+        if isOver { return Color.white.opacity(0.85) }
+        return aheadOfPace ? Theme.Palette.amber : Theme.Palette.greenAccent
+    }
+
+    // MARK: Log expense CTA
+
+    private var logButton: some View {
+        Button { showAdd = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill").font(.system(size: 18, weight: .semibold))
+                Text("Log expense").font(.ui(16, .bold))
+            }
+            .foregroundStyle(Theme.Palette.green)
+            .frame(maxWidth: .infinity).padding(.vertical, 15)
+            .background(Theme.Palette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous)
+                .stroke(Theme.Palette.greenSoft, lineWidth: 1))
+            .appShadow(.card)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Stat tiles
