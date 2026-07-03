@@ -10,21 +10,20 @@ struct LogExpenseIntent: AppIntent {
     static var description = IntentDescription("Quickly record an expense or income in Planner.")
     static var openAppWhenRun = false
 
-    @Parameter(title: "Amount")
+    @Parameter(title: "Amount", requestValueDialog: "How much?")
     var amount: Double
 
     @Parameter(title: "Type", default: .expense)
     var kind: TransactionKindAppEnum
 
-    @Parameter(title: "Category")
-    var category: CategoryEntity?
+    @Parameter(title: "Category", requestValueDialog: "Which category?")
+    var category: CategoryEntity
 
     @Parameter(title: "Note")
     var note: String?
 
     static var parameterSummary: some ParameterSummary {
-        Summary("Log \(\.$kind) of \(\.$amount)") {
-            \.$category
+        Summary("Log \(\.$kind) of \(\.$amount) in \(\.$category)") {
             \.$note
         }
     }
@@ -36,13 +35,11 @@ struct LogExpenseIntent: AppIntent {
         let resolved: String
         if kind == .income {
             // Income isn't tied to the expense category list — keep what was said.
-            let typed = category?.name.trimmingCharacters(in: .whitespaces) ?? ""
+            let typed = category.name.trimmingCharacters(in: .whitespaces)
             resolved = typed.isEmpty ? "Income" : typed
-        } else if let cat = category {
-            // Match an existing category (name or keyword), else create it.
-            resolved = ExpenseCategoryResolver.resolveOrCreate(cat.name)
         } else {
-            resolved = "Other"
+            // Match an existing category (name or keyword), else create it.
+            resolved = ExpenseCategoryResolver.resolveOrCreate(category.name)
         }
 
         let txn = Transaction(
@@ -191,7 +188,10 @@ struct PlannerAppShortcuts: AppShortcutsProvider {
             phrases: [
                 "Log an expense in \(.applicationName)",
                 "Log expense in \(.applicationName)",
+                "Add an expense in \(.applicationName)",
                 "Add an expense to \(.applicationName)",
+                "Record an expense in \(.applicationName)",
+                "New expense in \(.applicationName)",
             ],
             shortTitle: "Log Expense",
             systemImageName: "plus.circle.fill"
