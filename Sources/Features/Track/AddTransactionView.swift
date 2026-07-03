@@ -55,8 +55,14 @@ struct AddTransactionView: View {
                 .padding(.top, 8)
             }
             .scrollDismissesKeyboard(.interactively)
-            keypad
+            // The custom keypad drives the amount. Hide it while the Note field
+            // is focused so it doesn't sit under the system keyboard — tapping
+            // the amount (below) brings it back.
+            if !noteFocused {
+                keypad
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: noteFocused)
         .frame(maxWidth: 520)
         .frame(maxWidth: .infinity)
         .background(Theme.Palette.page.ignoresSafeArea())
@@ -144,6 +150,9 @@ struct AddTransactionView: View {
             }
         }
         .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture { noteFocused = false }   // tap the amount → back to the keypad
     }
 
     // MARK: Category chips

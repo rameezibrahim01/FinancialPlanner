@@ -11,6 +11,7 @@ struct DashboardView: View {
     @Query(sort: \MonthPlan.month) private var plans: [MonthPlan]
     @Query private var txns: [Transaction]
     @Query(sort: \Recurring.order) private var recurring: [Recurring]
+    @Query(sort: \Category.order) private var categories: [Category]
 
     @State private var mode: Mode = .today
     @State private var showAdd = false
@@ -42,42 +43,55 @@ struct DashboardView: View {
     private var monthExpense: Double { monthTxns.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount } }
     private var saved: Double { monthIncome - monthExpense }
 
-    /// Recurring charges still to post this month (due day not yet passed).
-    private var committedRemaining: Double {
-        recurring.filter { $0.dueDay >= todayDay }.reduce(0) { $0 + $1.amount }
+    // MARK: Safe-to-spend (discretionary model)
+    //
+    // Fixed recurring bills (rent, subscriptions) are reserved for the whole
+    // month up front and excluded from the daily "safe to spend" — otherwise the
+    // day a big bill auto-posts, it lands as "spent today" and zeroes the number.
+    // Safe-to-spend is purely *discretionary* money: the budget left after bills,
+    // spread over the remaining days.
+
+    /// Fixed monthly bills that post automatically — reserved for the month.
+    private var committedTotal: Double {
+        recurring.filter { $0.autoPost && $0.cadence == .monthly }.reduce(0) { $0 + $1.amount }
     }
-    private var safeBase: Double { monthBudget - committedRemaining - monthExpense }
-    private var leftThisMonth: Double { monthBudget - monthExpense }
-    private var spentFraction: Double { monthBudget > 0 ? min(1, monthExpense / monthBudget) : 0 }
-    private var onPlan: Bool { monthExpense <= monthBudget }
+    /// Budget available for day-to-day variable spending, after reserving bills.
+    private var discretionaryBudget: Double { max(0, monthBudget - committedTotal) }
 
-    /// The month's budget is exhausted (committed + spent exceed it).
-    private var isOver: Bool { safeBase < 0 }
-    private var overAmount: Double { max(0, -safeBase) }
-
-    /// Spent so far today, and everything spent earlier this month.
+    /// Variable (non-auto-posted) expenses this month, all-time / today / earlier.
+    private var discretionaryTxns: [Transaction] {
+        monthTxns.filter { $0.type == .expense && !$0.autoPosted }
+    }
+    private var discretionarySpent: Double { discretionaryTxns.reduce(0) { $0 + $1.amount } }
     private var spentToday: Double {
-        txns.filter { $0.type == .expense && cal.isDate($0.date, inSameDayAs: today) }
-            .reduce(0) { $0 + $1.amount }
+        discretionaryTxns.filter { cal.isDate($0.date, inSameDayAs: today) }.reduce(0) { $0 + $1.amount }
     }
-    private var expenseBeforeToday: Double { monthExpense - spentToday }
-    /// Today's slice of the remaining plan — budget minus still-to-post
-    /// commitments and everything spent before today, spread over days left.
+    private var discretionaryBeforeToday: Double { discretionarySpent - spentToday }
+
+    private var discretionaryLeft: Double { discretionaryBudget - discretionarySpent }
+    private var leftThisMonth: Double { discretionaryLeft }
+    private var spentFraction: Double {
+        discretionaryBudget > 0 ? min(1, discretionarySpent / discretionaryBudget) : 0
+    }
+    private var onPlan: Bool { discretionarySpent <= discretionaryBudget }
+
+    /// The discretionary budget is exhausted.
+    private var isOver: Bool { discretionaryLeft < 0 }
+    private var overAmount: Double { max(0, -discretionaryLeft) }
+
+    /// Today's slice of the remaining discretionary budget, spread over days left.
     private var todayAllowance: Double {
-        max(0, (monthBudget - committedRemaining - expenseBeforeToday) / Double(daysRemaining))
+        max(0, (discretionaryBudget - discretionaryBeforeToday) / Double(daysRemaining))
     }
     /// Headline: what's left of today's allowance after today's spend.
     private var safeToday: Double { max(0, todayAllowance - spentToday) }
-    private var todaySpentFraction: Double {
-        todayAllowance > 0 ? min(1, spentToday / todayAllowance) : (spentToday > 0 ? 1 : 0)
-    }
 
     /// Pace: how far through the month we are, and whether spending is ahead of it.
     private var monthElapsed: Double { min(1, Double(todayDay) / Double(daysInMonth)) }
-    private var aheadOfPace: Bool { monthBudget > 0 && spentFraction > monthElapsed + 0.02 }
+    private var aheadOfPace: Bool { discretionaryBudget > 0 && spentFraction > monthElapsed + 0.02 }
     private var paceCaption: String {
         if isOver { return "Over your plan" }
-        if monthBudget <= 0 { return "No budget set" }
+        if discretionaryBudget <= 0 { return "No budget set" }
         return aheadOfPace ? "Ahead of pace" : "On pace"
     }
 
@@ -92,6 +106,31 @@ struct DashboardView: View {
     }
     private func dueCopy(_ n: Int) -> String {
         switch n { case 0: return "today"; case 1: return "tomorrow"; default: return "in \(n) days" }
+    }
+
+    // MARK: Empty state & recent activity
+
+    /// No budget planned for this month yet — the safe-to-spend math is
+    /// meaningless, so we show a setup nudge instead of a wall of zeros.
+    private var needsBudget: Bool { monthBudget <= 0 }
+
+    /// The five most recent transactions, newest first.
+    private var recentTxns: [Transaction] {
+        Array(txns.sorted { $0.date > $1.date }.prefix(5))
+    }
+
+    /// Accent color for a transaction's category (falls back to a neutral gray).
+    private func color(for name: String) -> String {
+        if let c = categories.first(where: { $0.name == name }) { return c.colorHex }
+        if name == "Salary" { return Theme.CategoryColor.housing }
+        return Theme.CategoryColor.other
+    }
+
+    private func dayLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.calendar = cal
+        f.dateFormat = "d MMM"
+        return f.string(from: date)
     }
 
     // MARK: Year view (12-month grid)
@@ -141,10 +180,18 @@ struct DashboardView: View {
                 .pickerStyle(.segmented)
 
                 if mode == .today {
-                    safeToSpendCard
-                    logButton
-                    statTiles
-                    upcomingSection
+                    if needsBudget {
+                        setupHint
+                        logButton
+                    } else {
+                        safeToSpendCard
+                        logButton
+                        statTiles
+                        upcomingSection
+                    }
+                    if !recentTxns.isEmpty {
+                        recentSection
+                    }
                 } else {
                     yearNetCard
                     glance
@@ -175,12 +222,96 @@ struct DashboardView: View {
                     .foregroundStyle(Theme.Palette.ink)
             }
             Spacer()
-            Pill(text: onPlan ? "On plan" : "Off plan",
-                 bg: onPlan ? Theme.Palette.greenSoft : Theme.Palette.claySoft,
-                 fg: onPlan ? Theme.Palette.green : Theme.Palette.clay,
-                 dot: onPlan ? Theme.Palette.green : Theme.Palette.clay)
+            if !needsBudget {
+                Pill(text: onPlan ? "On plan" : "Off plan",
+                     bg: onPlan ? Theme.Palette.greenSoft : Theme.Palette.claySoft,
+                     fg: onPlan ? Theme.Palette.green : Theme.Palette.clay,
+                     dot: onPlan ? Theme.Palette.green : Theme.Palette.clay)
+            }
         }
         .padding(.horizontal, 4)
+    }
+
+    // MARK: Empty-state setup hint
+
+    private var setupHint: some View {
+        Group {
+            if let plan = monthPlan {
+                NavigationLink {
+                    MonthPlanEditorView(plan: plan)
+                } label: { setupHintCard }
+                .buttonStyle(.plain)
+            } else {
+                setupHintCard
+            }
+        }
+    }
+
+    private var setupHintCard: some View {
+        HStack(spacing: 14) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Theme.Palette.green).frame(width: 44, height: 44)
+                .overlay(Image(systemName: "wand.and.stars")
+                    .font(.system(size: 19, weight: .semibold)).foregroundStyle(.white))
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Set up \(MonthPlan.longNames[curMonth - 1])")
+                    .font(.ui(16, .bold)).foregroundStyle(Theme.Palette.ink)
+                Text("Add this month's income and budget to unlock your daily safe-to-spend.")
+                    .font(.ui(12)).foregroundStyle(Theme.Palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.Palette.green)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity)
+        .background(Theme.Palette.greenSoft2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.largeSummary, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.largeSummary, style: .continuous)
+            .stroke(Color(hex: "#cfe0d6"), lineWidth: 1))
+    }
+
+    // MARK: Recent activity
+
+    private var recentSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Recent activity")
+                .font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+                .padding(.horizontal, 4)
+            Card(padding: 4) {
+                VStack(spacing: 0) {
+                    ForEach(Array(recentTxns.enumerated()), id: \.element.persistentModelID) { idx, t in
+                        recentRow(t)
+                        if idx < recentTxns.count - 1 {
+                            Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
+                                .padding(.leading, 44)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func recentRow(_ t: Transaction) -> some View {
+        let income = t.type == .income
+        return HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(Color(hex: color(for: t.categoryName)).opacity(0.18))
+                .frame(width: 32, height: 32)
+                .overlay(Circle().fill(Color(hex: color(for: t.categoryName))).frame(width: 9, height: 9))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(t.note.isEmpty ? t.categoryName : t.note)
+                    .font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink).lineLimit(1)
+                Text("\(dayLabel(t.date)) · \(t.categoryName)")
+                    .font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+            }
+            Spacer()
+            Text("\(income ? "+" : "−")\(Money.plain(t.amount))").tabular()
+                .font(.ui(14, .bold))
+                .foregroundStyle(income ? Theme.Palette.green : Theme.Palette.clay)
+        }
+        .padding(.vertical, 11).padding(.horizontal, 11)
     }
 
     // MARK: Safe to spend hero
@@ -225,13 +356,19 @@ struct DashboardView: View {
 
             HStack {
                 Text(isOver
-                     ? "Spent \(Money.aed(monthExpense)) of \(Money.plain(monthBudget))"
+                     ? "Spent \(Money.aed(discretionarySpent)) of \(Money.plain(discretionaryBudget))"
                      : "Spent today \(Money.aed(spentToday)) of \(Money.plain(todayAllowance))")
                 Spacer()
-                Text("\(Money.aed(leftThisMonth)) left")
+                Text("\(Money.aed(discretionaryLeft)) left")
             }
             .font(.ui(12)).foregroundStyle(heroSubtle)
             .padding(.top, 4)
+
+            if committedTotal > 0 {
+                Text("\(Money.aed(committedTotal)) in bills set aside for the month")
+                    .font(.ui(11)).foregroundStyle(heroSubtle)
+                    .padding(.top, 3)
+            }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
