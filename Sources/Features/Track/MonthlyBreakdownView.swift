@@ -7,6 +7,7 @@ struct MonthlyBreakdownView: View {
     let plan: MonthPlan
     @Query private var txns: [Transaction]
     @Query(sort: \Category.order) private var categories: [Category]
+    @State private var editingTxn: Transaction?
 
     init(plan: MonthPlan) {
         self.plan = plan
@@ -51,6 +52,9 @@ struct MonthlyBreakdownView: View {
         }
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $editingTxn) { txn in
+            AddTransactionView(editing: txn)
+        }
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack(spacing: 2) {
@@ -137,7 +141,10 @@ struct MonthlyBreakdownView: View {
             Card(padding: 6) {
                 VStack(spacing: 0) {
                     ForEach(Array(txns.enumerated()), id: \.element.persistentModelID) { idx, t in
-                        RecentRow(txn: t, colorHex: color(for: t.categoryName))
+                        Button { editingTxn = t } label: {
+                            RecentRow(txn: t, colorHex: color(for: t.categoryName))
+                        }
+                        .buttonStyle(.plain)
                         if idx < txns.count - 1 {
                             Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
                                 .padding(.leading, 50)

@@ -15,6 +15,7 @@ struct DashboardView: View {
 
     @State private var mode: Mode = .today
     @State private var showAdd = false
+    @State private var editingTxn: Transaction?
     enum Mode: String, CaseIterable, Identifiable {
         case today = "Today", year = "Year"
         var id: String { rawValue }
@@ -229,6 +230,9 @@ struct DashboardView: View {
         .sheet(isPresented: $showAdd) {
             AddTransactionView()
         }
+        .sheet(item: $editingTxn) { txn in
+            AddTransactionView(editing: txn)
+        }
     }
 
     // MARK: Header
@@ -304,7 +308,8 @@ struct DashboardView: View {
             Card(padding: 4) {
                 VStack(spacing: 0) {
                     ForEach(Array(recentTxns.enumerated()), id: \.element.persistentModelID) { idx, t in
-                        recentRow(t)
+                        Button { editingTxn = t } label: { recentRow(t) }
+                            .buttonStyle(.plain)
                         if idx < recentTxns.count - 1 {
                             Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
                                 .padding(.leading, 44)
