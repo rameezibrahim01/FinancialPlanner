@@ -29,6 +29,8 @@
 	<false/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Planner uses Face ID to unlock your financial data on this device.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Planner uses the camera to scan receipts and read the amount, on your device.</string>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDarkContent</string>
 	<key>UIUserInterfaceStyle</key>

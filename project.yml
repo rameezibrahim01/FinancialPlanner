@@ -36,6 +36,7 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSFaceIDUsageDescription: Planner uses Face ID to unlock your financial data on this device.
+        NSCameraUsageDescription: Planner uses the camera to scan receipts and read the amount, on your device.
         UIUserInterfaceStyle: Light
         UIStatusBarStyle: UIStatusBarStyleDarkContent
     settings:

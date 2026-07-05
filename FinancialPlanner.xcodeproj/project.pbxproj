@@ -20,6 +20,7 @@
 		B1B1B1B1B1B1B1B1B1B1B102 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A102 /* DashboardView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B103 /* MonthlyBreakdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A103 /* MonthlyBreakdownView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B104 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A104 /* AddTransactionView.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B120 /* ReceiptScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A120 /* ReceiptScanner.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B105 /* ChartsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B106 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B107 /* AppEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A107 /* AppEntryView.swift */; };
@@ -53,6 +54,7 @@
 		A1A1A1A1A1A1A1A1A1A1A102 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A103 /* MonthlyBreakdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyBreakdownView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A104 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A120 /* ReceiptScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptScanner.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A105 /* ChartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A106 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A107 /* AppEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEntryView.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				A1A1A1A1A1A1A1A1A1A1A102 /* DashboardView.swift */,
 				A1A1A1A1A1A1A1A1A1A1A103 /* MonthlyBreakdownView.swift */,
 				A1A1A1A1A1A1A1A1A1A1A104 /* AddTransactionView.swift */,
+				A1A1A1A1A1A1A1A1A1A1A120 /* ReceiptScanner.swift */,
 			);
 			path = Track;
 			sourceTree = "<group>";
@@ -282,6 +285,7 @@
 				B1B1B1B1B1B1B1B1B1B1B102 /* DashboardView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B103 /* MonthlyBreakdownView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B104 /* AddTransactionView.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B120 /* ReceiptScanner.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B105 /* ChartsView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B106 /* SettingsView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B107 /* AppEntryView.swift in Sources */,

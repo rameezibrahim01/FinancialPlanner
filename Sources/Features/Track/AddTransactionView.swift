@@ -18,6 +18,8 @@ struct AddTransactionView: View {
     @State private var selectedCategory = ""
     @State private var note = ""
     @State private var caretOn = true
+    @State private var showScanner = false
+    @State private var scanning = false
     @FocusState private var noteFocused: Bool
 
     init(editing: Transaction? = nil) {
@@ -71,6 +73,7 @@ struct AddTransactionView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     segmented
+                    scanButton
                     amountDisplay
                     chipGrid
                     detailRows
@@ -100,6 +103,22 @@ struct AddTransactionView: View {
         .frame(maxWidth: 520)
         .frame(maxWidth: .infinity)
         .background(Theme.Palette.page.ignoresSafeArea())
+        .fullScreenCover(isPresented: $showScanner) {
+            ReceiptCameraScanner { image in
+                showScanner = false
+                guard let image else { return }
+                scanning = true
+                Task {
+                    let result = await ReceiptParser.scan(image)
+                    await MainActor.run {
+                        if let amt = result.amount { amountString = formatAmount(amt) }
+                        if let m = result.merchant, note.isEmpty { note = m }
+                        scanning = false
+                    }
+                }
+            }
+            .ignoresSafeArea()
+        }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -115,6 +134,32 @@ struct AddTransactionView: View {
         if !chips.contains(where: { $0.name == selectedCategory }) {
             selectedCategory = chips.first?.name ?? ""
         }
+    }
+
+    // MARK: Scan receipt
+
+    private var scanButton: some View {
+        Button { showScanner = true } label: {
+            HStack(spacing: 8) {
+                if scanning {
+                    ProgressView().controlSize(.small).tint(Theme.Palette.green)
+                } else {
+                    Image(systemName: "doc.viewfinder").font(.system(size: 15, weight: .semibold))
+                }
+                Text(scanning ? "Reading receipt…" : "Scan a receipt").font(.ui(14, .semibold))
+            }
+            .foregroundStyle(Theme.Palette.green)
+            .frame(maxWidth: .infinity).padding(.vertical, 11)
+            .background(Theme.Palette.greenSoft2)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .disabled(scanning)
+    }
+
+    /// Formats a scanned amount for the keypad display (no trailing .00).
+    private func formatAmount(_ v: Double) -> String {
+        v == v.rounded() ? String(Int(v)) : String(format: "%.2f", v)
     }
 
     // MARK: Nav row
