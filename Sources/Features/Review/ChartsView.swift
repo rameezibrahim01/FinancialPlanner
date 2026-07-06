@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Charts
 
 /// D1 · Charts & trends — visualize cash flow over the year: average/best/worst
 /// stat cards, a net-by-month bar chart, and a top-categories breakdown. All
@@ -51,6 +52,7 @@ struct ChartsView: View {
                 header
                 statCards
                 netChart
+                if totalExpense > 0 { spendingMix }
                 topCategories
             }
             .padding(.horizontal, Theme.Spacing.side)
@@ -108,20 +110,70 @@ struct ChartsView: View {
     private var netChart: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Net by month").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
-            let maxAbs = max(1, months.map { abs($0.net) }.max() ?? 1)
-            HStack(alignment: .bottom, spacing: 6) {
+            Chart {
                 ForEach(months, id: \.m) { item in
-                    VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 4, style: .continuous)
-                            .fill(item.net < 0 ? Theme.Palette.clay : Theme.Palette.green)
-                            .frame(height: max(3, abs(item.net) / maxAbs * 118))
-                        Text(String(MonthPlan.shortNames[item.m - 1].prefix(1)))
-                            .font(.mono(9, .medium)).foregroundStyle(Theme.Palette.faint)
-                    }
-                    .frame(maxWidth: .infinity)
+                    BarMark(
+                        x: .value("Month", MonthPlan.shortNames[item.m - 1]),
+                        y: .value("Net", item.net)
+                    )
+                    .foregroundStyle(item.net < 0 ? Theme.Palette.clay : Theme.Palette.green)
+                    .cornerRadius(4)
                 }
             }
-            .frame(height: 140, alignment: .bottom)
+            .chartYAxis {
+                AxisMarks { value in
+                    AxisGridLine().foregroundStyle(Theme.Palette.hairline)
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(Money.thousands(v) + "k")
+                                .font(.mono(9)).foregroundStyle(Theme.Palette.faint)
+                        }
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisValueLabel {
+                        if let s = value.as(String.self) {
+                            Text(String(s.prefix(1)))
+                                .font(.mono(9)).foregroundStyle(Theme.Palette.faint)
+                        }
+                    }
+                }
+            }
+            .frame(height: 180)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.Palette.surface)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+        .appShadow(.card)
+    }
+
+    // MARK: Spending mix (donut)
+
+    private var spendingMix: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Spending mix").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
+            ZStack {
+                Chart {
+                    ForEach(expenseByCategory.prefix(8), id: \.name) { row in
+                        SectorMark(
+                            angle: .value("Amount", row.amount),
+                            innerRadius: .ratio(0.62),
+                            angularInset: 1.5
+                        )
+                        .cornerRadius(3)
+                        .foregroundStyle(Color(hex: color(for: row.name)))
+                    }
+                }
+                .frame(height: 200)
+                VStack(spacing: 2) {
+                    Text("Total").font(.ui(11)).foregroundStyle(Theme.Palette.muted)
+                    Text(Money.plain(totalExpense)).tabular()
+                        .font(.ui(18, .heavy)).foregroundStyle(Theme.Palette.ink)
+                }
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

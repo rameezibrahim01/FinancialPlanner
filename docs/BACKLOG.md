@@ -10,8 +10,9 @@ Deferred items to pick up later. Newest at the top of each section.
   flag and recurring link.
 
 ## Offline capture (from the earlier options list)
-- [ ] Receipt scanning (VisionKit / Vision on-device OCR)
+- [x] "Log Expense" App Intent (Siri / Shortcuts / Spotlight / Action Button)
+- [x] Receipt scanning (VisionKit / Vision on-device OCR)
+- [x] CSV / statement file import (offline parse)
 - [ ] Interactive Home/Lock-screen widget with quick "Log expense"
-- [ ] CSV / statement file import (offline parse)
 - [ ] Apple Watch app + complication
 - [ ] Local notification reminders (bring back properly)
