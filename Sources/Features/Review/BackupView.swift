@@ -24,6 +24,11 @@ struct BackupView: View {
     @State private var showRestoreConfirm = false
     @State private var errorMessage: String?
 
+    @State private var showCSVImporter = false
+    @State private var pendingCSV: [CSVImport.Row]?
+    @State private var showCSVConfirm = false
+    @State private var noticeMessage: String?
+
     private let year = SampleData.year
 
     var body: some View {
@@ -39,6 +44,10 @@ struct BackupView: View {
                     divider
                     row("Share backup file", "Full data · .planner",
                         tint: "#dbeae1", icon: "square.and.arrow.up", action: shareBackup)
+                }
+                section("IMPORT") {
+                    row("Import transactions (CSV)", "Add rows from a bank statement or export",
+                        tint: "#e6ead7", icon: "tray.and.arrow.down", tinted: true) { showCSVImporter = true }
                 }
                 section("BACKUP") {
                     HStack(spacing: 12) {
@@ -82,6 +91,33 @@ struct BackupView: View {
                                                           set: { if !$0 { errorMessage = nil } })) {
             Button("OK", role: .cancel) {}
         } message: { Text(errorMessage ?? "") }
+        .fileImporter(isPresented: $showCSVImporter, allowedContentTypes: [.commaSeparatedText]) { result in
+            guard case .success(let url) = result else { return }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard let data = try? Data(contentsOf: url),
+                  let text = String(data: data, encoding: .utf8) else {
+                errorMessage = "That file couldn't be read."; return
+            }
+            let rows = CSVImport.parse(text)
+            if rows.isEmpty {
+                errorMessage = "No transactions found. The CSV needs a header with Date and Amount columns (e.g. Date, Type, Category, Amount, Note)."
+            } else {
+                pendingCSV = rows
+                showCSVConfirm = true
+            }
+        }
+        .alert("Import \(pendingCSV?.count ?? 0) transaction\(pendingCSV?.count == 1 ? "" : "s")?",
+               isPresented: $showCSVConfirm) {
+            Button("Cancel", role: .cancel) { pendingCSV = nil }
+            Button("Import") { performCSVImport() }
+        } message: {
+            Text("They're added to your existing data. Rows that already exist are skipped.")
+        }
+        .alert("Import complete", isPresented: Binding(get: { noticeMessage != nil },
+                                                       set: { if !$0 { noticeMessage = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: { Text(noticeMessage ?? "") }
     }
 
     // MARK: Status
@@ -191,6 +227,32 @@ struct BackupView: View {
             shareItem = ShareItem(url: url)
         } catch { errorMessage = error.localizedDescription }
     }
+    /// Inserts the parsed CSV rows, skipping ones that already exist (matched on
+    /// day + type + amount + category + note).
+    private func performCSVImport() {
+        guard let rows = pendingCSV else { return }
+        let cal = SampleData.cal()
+        func key(_ date: Date, _ type: TxType, _ amount: Double, _ category: String, _ note: String) -> String {
+            let day = Int(cal.startOfDay(for: date).timeIntervalSince1970)
+            return "\(day)|\(type.rawValue)|\(Int((amount * 100).rounded()))|\(category.lowercased())|\(note.lowercased())"
+        }
+        var seen = Set(txns.map { key($0.date, $0.type, $0.amount, $0.categoryName, $0.note) })
+        var added = 0
+        for r in rows {
+            let k = key(r.date, r.type, r.amount, r.category, r.note)
+            if seen.contains(k) { continue }
+            seen.insert(k)
+            context.insert(Transaction(type: r.type, amount: r.amount,
+                                       categoryName: r.category, date: r.date, note: r.note))
+            added += 1
+        }
+        try? context.save()
+        let skipped = rows.count - added
+        noticeMessage = "Imported \(added) transaction\(added == 1 ? "" : "s")"
+            + (skipped > 0 ? ", skipped \(skipped) duplicate\(skipped == 1 ? "" : "s")." : ".")
+        pendingCSV = nil
+    }
+
     private func performRestore() {
         guard let url = pendingRestoreURL else { return }
         let scoped = url.startAccessingSecurityScopedResource()
