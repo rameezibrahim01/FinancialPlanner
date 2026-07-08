@@ -90,7 +90,7 @@ struct BudgetSetupView: View {
             Spacer()
             if income > 0 {
                 Button { applySuggestion() } label: {
-                    Label("Re-suggest", systemImage: "wand.and.stars")
+                    Label("Reset to suggested", systemImage: "arrow.counterclockwise")
                         .font(.ui(12, .semibold)).foregroundStyle(Theme.Palette.green)
                 }
             } else {
