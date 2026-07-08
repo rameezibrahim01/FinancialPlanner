@@ -1,8 +1,9 @@
 import SwiftUI
 import SwiftData
 
-/// A2 · Income setup — add recurring income sources; baseline for plans. The
-/// projected annual income is the sum of every source's amount × 12.
+/// A2 · Income setup — your name, income sources, and starting savings; the
+/// baseline for plans. Monthly income (sum of sources) is carried into the
+/// current month and every later month.
 struct IncomeSetupView: View {
     var onFinish: () -> Void
 
@@ -10,7 +11,10 @@ struct IncomeSetupView: View {
     @Query(sort: \IncomeSource.amount, order: .reverse) private var sources: [IncomeSource]
     @Query private var plans: [MonthPlan]
     @AppStorage("startingSavings") private var startingSavings = 0.0
+    @AppStorage("displayName") private var displayName = ""
     @State private var showAdd = false
+    @State private var editingSource: IncomeSource?
+    @State private var savingsText = ""
     @State private var goToBudget = false
 
     private var monthlyIncome: Double { sources.reduce(0) { $0 + $1.amount } }
@@ -18,11 +22,11 @@ struct IncomeSetupView: View {
     private var currentMonth: Int { SampleData.cal().component(.month, from: SampleData.referenceToday) }
     private var currentYear: Int { SampleData.cal().component(.year, from: SampleData.referenceToday) }
 
-    /// Carries the monthly income into the current month and every later month so
-    /// the plan is populated. Past months stay at 0 (you weren't planning then).
+    /// Carries the latest monthly income into the current month and every later
+    /// month, overwriting so edits made here always propagate. Past months stay
+    /// at 0 (you weren't planning then).
     private func applyIncome() {
-        for plan in plans where plan.year == currentYear && plan.month >= currentMonth
-            && plan.plannedIncome == 0 {
+        for plan in plans where plan.year == currentYear && plan.month >= currentMonth {
             plan.plannedIncome = monthlyIncome
         }
         try? context.save()
@@ -33,9 +37,13 @@ struct IncomeSetupView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.section) {
                     header
+                    nameField
                     VStack(spacing: 12) {
                         ForEach(sources, id: \.persistentModelID) { source in
-                            IncomeSourceCard(source: source)
+                            Button { editingSource = source } label: {
+                                IncomeSourceCard(source: source)
+                            }
+                            .buttonStyle(.plain)
                         }
                         DashedAddTile(title: "+ Add income source") { showAdd = true }
                     }
@@ -55,14 +63,27 @@ struct IncomeSetupView: View {
         .navigationDestination(isPresented: $goToBudget) {
             BudgetSetupView(onFinish: onFinish)
         }
+        .onAppear { savingsText = startingSavings > 0 ? String(Int(startingSavings)) : "" }
         .sheet(isPresented: $showAdd) {
-            AddIncomeSheet { name, cadence, amount, recurring in
+            IncomeEditorSheet(existing: nil) { fields in
                 let tints = ["#dbeae1", "#e6ead7", "#eef6f1", "#eaf2ed"]
                 let tint = tints[sources.count % tints.count]
-                context.insert(IncomeSource(name: name, cadence: cadence, amount: amount,
-                                            recurring: recurring, tintHex: tint))
+                context.insert(IncomeSource(name: fields.name, cadence: fields.cadence,
+                                            amount: fields.amount, recurring: fields.recurring, tintHex: tint))
                 try? context.save()
             }
+        }
+        .sheet(item: $editingSource) { source in
+            IncomeEditorSheet(existing: source, onSave: { fields in
+                source.name = fields.name
+                source.cadence = fields.cadence
+                source.amount = fields.amount
+                source.recurring = fields.recurring
+                try? context.save()
+            }, onDelete: {
+                context.delete(source)
+                try? context.save()
+            })
         }
     }
 
@@ -80,6 +101,24 @@ struct IncomeSetupView: View {
         .padding(.horizontal, 4)
     }
 
+    // MARK: Name
+
+    private var nameField: some View {
+        Card(padding: 16, radius: Theme.Radius.card) {
+            HStack {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Your name").font(.ui(14, .semibold)).foregroundStyle(Theme.Palette.ink)
+                    Text("So the app can greet you").font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+                }
+                Spacer()
+                TextField("Optional", text: $displayName)
+                    .multilineTextAlignment(.trailing)
+                    .font(.ui(16, .semibold)).foregroundStyle(Theme.Palette.ink)
+                    .frame(maxWidth: 170)
+            }
+        }
+    }
+
     // MARK: Current savings
 
     private var savingsField: some View {
@@ -92,11 +131,14 @@ struct IncomeSetupView: View {
                 Spacer()
                 HStack(spacing: 4) {
                     Text("AED").font(.ui(13)).foregroundStyle(Theme.Palette.muted)
-                    TextField("0", value: $startingSavings, format: .number)
+                    TextField("0", text: $savingsText)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .font(.ui(16, .bold))
                         .frame(maxWidth: 110)
+                        .onChange(of: savingsText) { _, v in
+                            startingSavings = Double(v.filter { $0.isNumber || $0 == "." }) ?? 0
+                        }
                 }
             }
         }
@@ -157,25 +199,48 @@ private struct IncomeSourceCard: View {
                         Text("recurring").font(.ui(11, .semibold)).foregroundStyle(Theme.Palette.green)
                     }
                 }
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color(hex: "#cdd2cb"))
             }
         }
     }
 }
 
-// MARK: - Add income sheet
+// MARK: - Add / edit income sheet
 
-private struct AddIncomeSheet: View {
-    /// (name, cadence, amount, recurring)
-    var onSave: (String, String, Double, Bool) -> Void
+struct IncomeFields {
+    var name: String
+    var cadence: String
+    var amount: Double
+    var recurring: Bool
+}
+
+private struct IncomeEditorSheet: View {
+    let existing: IncomeSource?
+    var onSave: (IncomeFields) -> Void
+    var onDelete: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var amountText = ""
-    @State private var monthly = true
-    @State private var recurring = true
+    @State private var name: String
+    @State private var amountText: String
+    @State private var monthly: Bool
+    @State private var recurring: Bool
 
-    private var amount: Double { Double(amountText) ?? 0 }
+    init(existing: IncomeSource?,
+         onSave: @escaping (IncomeFields) -> Void,
+         onDelete: (() -> Void)? = nil) {
+        self.existing = existing
+        self.onSave = onSave
+        self.onDelete = onDelete
+        _name = State(initialValue: existing?.name ?? "")
+        _amountText = State(initialValue: existing.map { $0.amount > 0 ? String(Int($0.amount)) : "" } ?? "")
+        _monthly = State(initialValue: existing.map { $0.cadence == "Monthly" } ?? true)
+        _recurring = State(initialValue: existing?.recurring ?? true)
+    }
+
+    private var amount: Double { Double(amountText.filter { $0.isNumber || $0 == "." }) ?? 0 }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
+    private var isEditing: Bool { existing != nil }
 
     var body: some View {
         NavigationStack {
@@ -186,32 +251,38 @@ private struct AddIncomeSheet: View {
                 Section("Amount") {
                     HStack {
                         Text("AED").foregroundStyle(Theme.Palette.muted)
-                        TextField("0", text: $amountText)
-                            .keyboardType(.decimalPad)
+                        TextField("0", text: $amountText).keyboardType(.decimalPad)
                     }
                     Picker("Cadence", selection: $monthly) {
                         Text("Monthly").tag(true)
                         Text("Avg / month").tag(false)
                     }
-                    Toggle("Recurring", isOn: $recurring)
-                        .tint(Theme.Palette.green)
+                    Toggle("Recurring", isOn: $recurring).tint(Theme.Palette.green)
+                }
+                if isEditing, let onDelete {
+                    Section {
+                        Button(role: .destructive) {
+                            onDelete()
+                            dismiss()
+                        } label: {
+                            Text("Delete income source").frame(maxWidth: .infinity)
+                        }
+                    }
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("Add income")
+            .navigationTitle(isEditing ? "Edit income" : "Add income")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
-                }
+                ToolbarItem(placement: .topBarLeading) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        onSave(name.trimmingCharacters(in: .whitespaces),
-                               monthly ? "Monthly" : "Avg / month", amount, recurring)
+                        onSave(IncomeFields(name: name.trimmingCharacters(in: .whitespaces),
+                                            cadence: monthly ? "Monthly" : "Avg / month",
+                                            amount: amount, recurring: recurring))
                         dismiss()
                     }
-                    .fontWeight(.bold)
-                    .disabled(!canSave)
+                    .fontWeight(.bold).disabled(!canSave)
                 }
             }
         }
