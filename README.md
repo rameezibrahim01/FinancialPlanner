@@ -37,6 +37,30 @@ Review screens have data to display, while keeping June's exact plan-vs-actual
 figures. The "Export backup file" action serializes all plans, transactions, and
 goals to a JSON file and presents the system share sheet (fully offline).
 
+## Build & run
+
+The Xcode project is **generated from `project.yml`** by
+[XcodeGen](https://github.com/yonwoo9/XcodeGen) and is **not committed**
+(it's in `.gitignore`). Generate it once after cloning or pulling:
+
+```bash
+brew install xcodegen      # one time
+xcodegen generate          # (re)creates FinancialPlanner.xcodeproj
+open FinancialPlanner.xcodeproj
+```
+
+Then in Xcode pick the **FinancialPlanner** scheme and Run (⌘R).
+
+- **Simulator** — no Apple account needed; just Run.
+- **Real device** — in *Signing & Capabilities* set your Team on both the
+  **FinancialPlanner** and **PlannerWidgetExtension** targets, keep the
+  **App Group** `group.com.presight.financialplanner` enabled on both, and
+  change the bundle-ID prefix (`com.presight`) to one you own.
+- Re-run `xcodegen generate` any time you add/rename files or edit `project.yml`.
+
+CI does exactly this (`xcodegen generate` → `xcodebuild build`), so the
+generated project is always reproducible from `project.yml`.
+
 ## Project layout
 
 ```
