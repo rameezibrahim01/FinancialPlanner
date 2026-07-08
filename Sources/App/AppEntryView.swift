@@ -1,6 +1,11 @@
 import SwiftUI
 import SwiftData
 
+extension Notification.Name {
+    /// Posted when a `planner://add` deep link (e.g. from the widget) opens the app.
+    static let plannerLogExpense = Notification.Name("plannerLogExpense")
+}
+
 /// Decides between first-launch setup (Lane 1) and the main app, and gates the
 /// whole thing behind the App Lock (V2-5) when enabled. Onboarding state and
 /// lock preferences are persisted.
@@ -33,6 +38,12 @@ struct AppEntryView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: isLocked)
+        .onOpenURL { url in
+            // Widget "Log expense" tap → open the Add screen.
+            if url.scheme == "planner" && url.host == "add" {
+                NotificationCenter.default.post(name: .plannerLogExpense, object: nil)
+            }
+        }
         .onAppear {
             if appLock { isLocked = true }
             maybeAutoPost()
@@ -44,6 +55,7 @@ struct AppEntryView: View {
             switch phase {
             case .background:
                 backgroundedAt = Date()
+                if hasCompletedOnboarding { WidgetSnapshotWriter.update(context) }
             case .active:
                 maybeAutoPost()   // catches a new day/month while backgrounded
                 guard appLock, let since = backgroundedAt else { return }
@@ -60,5 +72,6 @@ struct AppEntryView: View {
     private func maybeAutoPost() {
         guard hasCompletedOnboarding else { return }
         AutoPost.run(context)
+        WidgetSnapshotWriter.update(context)
     }
 }

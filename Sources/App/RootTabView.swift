@@ -92,6 +92,9 @@ private struct PhoneTabShell: View {
             AddTransactionView()
         }
         .onAppear { if let t = consumePendingTab() { tab = t } }
+        .onReceive(NotificationCenter.default.publisher(for: .plannerLogExpense)) { _ in
+            showAdd = true
+        }
     }
 
     @ViewBuilder private var currentScreen: some View {
@@ -209,6 +212,9 @@ private struct SidebarShell: View {
             AddTransactionView()
         }
         .onAppear { if let t = consumePendingTab() { selection = t } }
+        .onReceive(NotificationCenter.default.publisher(for: .plannerLogExpense)) { _ in
+            showAdd = true
+        }
     }
 
     private var brand: some View {
