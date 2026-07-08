@@ -31,6 +31,11 @@ struct BudgetSetupView: View {
                     header
                     if let plan = thisMonth {
                         incomeCard(plan)
+                        if income > 0 {
+                            Text("We drafted this from your income — tweak any category, then confirm.")
+                                .font(.ui(12)).foregroundStyle(Theme.Palette.muted)
+                                .padding(.horizontal, 4)
+                        }
                         categoriesHeader
                         VStack(spacing: 12) {
                             ForEach(plan.orderedBudgets, id: \.persistentModelID) { budget in
@@ -50,7 +55,7 @@ struct BudgetSetupView: View {
         }
         .screenBackground()
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(perform: ensureAllCategories)
+        .onAppear(perform: setup)
     }
 
     // MARK: Header
@@ -83,7 +88,14 @@ struct BudgetSetupView: View {
         HStack {
             Text("Category budgets").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.ink)
             Spacer()
-            Text("tap an amount to type").font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+            if income > 0 {
+                Button { applySuggestion() } label: {
+                    Label("Re-suggest", systemImage: "wand.and.stars")
+                        .font(.ui(12, .semibold)).foregroundStyle(Theme.Palette.green)
+                }
+            } else {
+                Text("tap an amount to type").font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+            }
         }
         .padding(.horizontal, 4)
     }
@@ -121,6 +133,14 @@ struct BudgetSetupView: View {
 
     // MARK: Actions
 
+    private func setup() {
+        ensureAllCategories()
+        // Draft a starting plan from income the first time (nothing set yet).
+        if let plan = thisMonth, income > 0, plan.budgets.allSatisfy({ $0.amount == 0 }) {
+            applySuggestion()
+        }
+    }
+
     /// Shows every category (at 0) on the current month so the whole list is editable.
     private func ensureAllCategories() {
         guard let plan = thisMonth else { return }
@@ -132,6 +152,15 @@ struct BudgetSetupView: View {
             added = true
         }
         if added { try? context.save() }
+    }
+
+    /// Fills every category with a rule-of-thumb amount from the month's income.
+    private func applySuggestion() {
+        guard let plan = thisMonth, income > 0 else { return }
+        for b in plan.budgets {
+            b.amount = BudgetSuggestion.amount(income: income, category: b.categoryName)
+        }
+        try? context.save()
     }
 
     private func finish(applyBudget: Bool) {
@@ -175,5 +204,10 @@ private struct BudgetEntryRow: View {
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
         .appShadow(.card)
         .onAppear { text = budget.amount > 0 ? String(Int(budget.amount)) : "" }
+        // Reflect external changes (draft / re-suggest) without fighting typing.
+        .onChange(of: budget.amount) { _, new in
+            let parsed = Double(text.filter(\.isNumber)) ?? 0
+            if parsed != new { text = new > 0 ? String(Int(new)) : "" }
+        }
     }
 }
