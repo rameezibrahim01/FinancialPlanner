@@ -26,6 +26,8 @@
 		B1B1B1B1B1B1B1B1B1B1B107 /* AppEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A107 /* AppEntryView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B118 /* AppModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A118 /* AppModelContainer.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B119 /* LogExpenseIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A119 /* LogExpenseIntent.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B122 /* WidgetShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A122 /* WidgetShared.swift */; };
+		B1B1B1B1B1B1B1B1B1B1B123 /* WidgetSnapshotWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A123 /* WidgetSnapshotWriter.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B108 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A108 /* WelcomeView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B109 /* IncomeSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A109 /* IncomeSetupView.swift */; };
 		B1B1B1B1B1B1B1B1B1B1B110 /* RecurringView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A1A1A1A1A1A1A1A1A1A110 /* RecurringView.swift */; };
@@ -61,6 +63,8 @@
 		A1A1A1A1A1A1A1A1A1A1A107 /* AppEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEntryView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A118 /* AppModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelContainer.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A119 /* LogExpenseIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogExpenseIntent.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A122 /* WidgetShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetShared.swift; sourceTree = "<group>"; };
+		A1A1A1A1A1A1A1A1A1A1A123 /* WidgetSnapshotWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotWriter.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A108 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A109 /* IncomeSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomeSetupView.swift; sourceTree = "<group>"; };
 		A1A1A1A1A1A1A1A1A1A1A110 /* RecurringView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringView.swift; sourceTree = "<group>"; };
@@ -101,6 +105,8 @@
 				A1A1A1A1A1A1A1A1A1A1A107 /* AppEntryView.swift */,
 				A1A1A1A1A1A1A1A1A1A1A118 /* AppModelContainer.swift */,
 				A1A1A1A1A1A1A1A1A1A1A119 /* LogExpenseIntent.swift */,
+				A1A1A1A1A1A1A1A1A1A1A122 /* WidgetShared.swift */,
+				A1A1A1A1A1A1A1A1A1A1A123 /* WidgetSnapshotWriter.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -294,6 +300,8 @@
 				B1B1B1B1B1B1B1B1B1B1B107 /* AppEntryView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B118 /* AppModelContainer.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B119 /* LogExpenseIntent.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B122 /* WidgetShared.swift in Sources */,
+				B1B1B1B1B1B1B1B1B1B1B123 /* WidgetSnapshotWriter.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B108 /* WelcomeView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B109 /* IncomeSetupView.swift in Sources */,
 				B1B1B1B1B1B1B1B1B1B1B110 /* RecurringView.swift in Sources */,
@@ -453,6 +461,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				CODE_SIGN_ENTITLEMENTS = Sources/FinancialPlanner.entitlements;
 				PRODUCT_BUNDLE_IDENTIFIER = com.presight.financialplanner;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -472,6 +481,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				CODE_SIGN_ENTITLEMENTS = Sources/FinancialPlanner.entitlements;
 				PRODUCT_BUNDLE_IDENTIFIER = com.presight.financialplanner;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

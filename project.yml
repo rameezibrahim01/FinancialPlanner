@@ -39,6 +39,10 @@ targets:
         NSCameraUsageDescription: Planner uses the camera to scan receipts and read the amount, on your device.
         UIUserInterfaceStyle: Light
         UIStatusBarStyle: UIStatusBarStyleDarkContent
+        CFBundleURLTypes:
+          - CFBundleURLName: com.presight.financialplanner
+            CFBundleURLSchemes:
+              - planner
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.presight.financialplanner
@@ -46,3 +50,28 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_PREVIEWS: "YES"
+        CODE_SIGN_ENTITLEMENTS: Sources/FinancialPlanner.entitlements
+    dependencies:
+      - target: PlannerWidgetExtension
+        embed: true
+
+  PlannerWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: PlannerWidget
+      - path: Sources/App/WidgetShared.swift
+    info:
+      path: PlannerWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Planner
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.presight.financialplanner.widget
+        GENERATE_INFOPLIST_FILE: "NO"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: "YES"
+        CODE_SIGN_ENTITLEMENTS: PlannerWidget/PlannerWidget.entitlements
