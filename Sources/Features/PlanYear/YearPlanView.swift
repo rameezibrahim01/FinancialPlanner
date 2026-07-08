@@ -10,6 +10,9 @@ struct YearPlanView: View {
     /// pill/stat are hidden.
     @AppStorage("annualSavingsGoal") private var yearSavingsGoal = 0.0
 
+    @State private var showAllUpcoming = false
+    @State private var showCopyConfirm = false
+
     private var totalIncome: Double { plans.reduce(0) { $0 + $1.plannedIncome } }
     private var totalBudget: Double { plans.reduce(0) { $0 + $1.budgetTotal } }
     private var totalSavings: Double { totalIncome - totalBudget }
@@ -21,6 +24,22 @@ struct YearPlanView: View {
     private var currentYear: Int { SampleData.cal().component(.year, from: SampleData.referenceToday) }
     private var currentMonthName: String { MonthPlan.longNames[currentMonth - 1] }
     private var hasAnyBudget: Bool { plans.contains { $0.budgetTotal > 0 } }
+
+    /// Planning is forward-looking, so we hide the noise of empty months. Shown:
+    /// the current month, any month that actually has a budget, and — when the
+    /// user expands — the remaining upcoming (still-empty) months of the year.
+    /// Past empty months are never listed.
+    private var visiblePlans: [MonthPlan] {
+        plans.filter { p in
+            p.budgetTotal > 0
+                || p.month == currentMonth
+                || (showAllUpcoming && p.month > currentMonth)
+        }
+    }
+    /// Upcoming months of the year that are still empty (and currently hidden).
+    private var hiddenUpcomingCount: Int {
+        plans.filter { $0.month > currentMonth && $0.budgetTotal == 0 }.count
+    }
 
     var body: some View {
         ScrollView {
@@ -56,6 +75,12 @@ struct YearPlanView: View {
                     Text("Goals").font(.ui(15, .bold)).foregroundStyle(Theme.Palette.green)
                 }
             }
+        }
+        .alert("Copy to remaining months?", isPresented: $showCopyConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Copy") { copyToAllMonths() }
+        } message: {
+            Text("Applies the budget you've set to \(currentMonthName) and every later month this year. Earlier months stay unchanged.")
         }
     }
 
@@ -157,7 +182,8 @@ struct YearPlanView: View {
     private var tableCard: some View {
         VStack(spacing: 0) {
             tableHeader
-            ForEach(Array(plans.enumerated()), id: \.element.persistentModelID) { idx, plan in
+            let rows = visiblePlans
+            ForEach(Array(rows.enumerated()), id: \.element.persistentModelID) { idx, plan in
                 NavigationLink {
                     MonthPlanEditorView(plan: plan)
                 } label: {
@@ -165,9 +191,13 @@ struct YearPlanView: View {
                              isCurrent: plan.month == currentMonth && plan.year == currentYear)
                 }
                 .buttonStyle(.plain)
-                if idx < plans.count - 1 {
+                if idx < rows.count - 1 {
                     Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
                 }
+            }
+            if hiddenUpcomingCount > 0 || showAllUpcoming {
+                Rectangle().fill(Theme.Palette.hairlineSoft).frame(height: 1)
+                expanderRow
             }
         }
         .padding(.horizontal, 14)
@@ -175,6 +205,26 @@ struct YearPlanView: View {
         .background(Theme.Palette.surface)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
         .appShadow(.card)
+    }
+
+    private var expanderRow: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) { showAllUpcoming.toggle() }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: showAllUpcoming ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(showAllUpcoming
+                     ? "Show planned only"
+                     : "Show all upcoming months (\(hiddenUpcomingCount))")
+                    .font(.ui(12, .semibold))
+                Spacer()
+            }
+            .foregroundStyle(Theme.Palette.green)
+            .frame(height: 40)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var tableHeader: some View {
@@ -200,7 +250,9 @@ struct YearPlanView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            SecondaryButton(title: "Copy to remaining months", action: copyToAllMonths)
+            if hasAnyBudget {
+                SecondaryButton(title: "Copy to remaining months") { showCopyConfirm = true }
+            }
             if let plan = defaultMonthPlan {
                 NavigationLink {
                     MonthPlanEditorView(plan: plan)
