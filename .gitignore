@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
+# The Xcode project is generated from project.yml by XcodeGen — never commit it.
+# Run `xcodegen generate` after cloning / pulling.
+*.xcodeproj/
+
 # Xcode build / user state
 build/
 DerivedData/
