@@ -9,9 +9,11 @@ settings:
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
+    # Automatic signing for both the app and the widget extension. CI builds for
+    # the simulator with CODE_SIGNING_ALLOWED=NO, so no team is needed there;
+    # set DEVELOPMENT_TEAM to your Apple Developer Team ID for device builds.
+    CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
-    CODE_SIGNING_REQUIRED: "NO"
-    CODE_SIGN_IDENTITY: ""
 targets:
   FinancialPlanner:
     type: application
