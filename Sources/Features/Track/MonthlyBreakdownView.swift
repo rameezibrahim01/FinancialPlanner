@@ -43,6 +43,7 @@ struct MonthlyBreakdownView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.section) {
                 netCard
+                planVsActualLink
                 categorySection
                 recentSection
             }
@@ -68,6 +69,35 @@ struct MonthlyBreakdownView: View {
                 }
             }
         }
+    }
+
+    // MARK: Plan vs actual entry
+
+    private var planVsActualLink: some View {
+        NavigationLink {
+            PlanVsActualView(plan: plan)
+        } label: {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Theme.Palette.greenSoft).frame(width: 36, height: 36)
+                    .overlay(Image(systemName: "chart.bar.xaxis")
+                        .font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.Palette.green))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Plan vs actual").font(.ui(14, .bold)).foregroundStyle(Theme.Palette.ink)
+                    Text("How your spending compares to plan")
+                        .font(.ui(11)).foregroundStyle(Theme.Palette.faint)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color(hex: "#cdd2cb"))
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity)
+            .background(Theme.Palette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+            .appShadow(.card)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Net card
